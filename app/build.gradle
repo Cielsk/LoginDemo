@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -11,8 +10,14 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-DEBUG'
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -20,6 +25,8 @@ android {
     productFlavors {
         dev {
             dimension "mode"
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-DEV'
             resConfigs("en", "xxhdpi")
         }
         full {
@@ -35,7 +42,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     // support
