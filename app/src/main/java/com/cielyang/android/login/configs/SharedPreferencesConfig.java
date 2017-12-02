@@ -3,7 +3,7 @@ package com.cielyang.android.login.configs;
 /**
  *
  */
-public class SharedPreferences {
+public class SharedPreferencesConfig {
 
     public static final String TOKEN_FILE_NMAE = "session_token";
 

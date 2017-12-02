@@ -5,6 +5,7 @@ import com.cielyang.android.login.BuildConfig;
 /** */
 public class Api {
 
+    public static final String QUERY_PARAM_NAME = "condition";
     // 注册
     private static final String REGISTER = "/users";
     // 登录
@@ -36,7 +37,7 @@ public class Api {
      *
      * @param isDebug 是否处于 debug 环境
      */
-    static void setDebug(boolean isDebug) {
+    public static void setDebug(boolean isDebug) {
         sDomain = isDebug ? DEBUG_DOMAIN : RElEASE_DOMAIN;
         sAppId = isDebug ? DEBUG_APP_ID : RELEASE_APP_ID;
         sAppKey = isDebug ? DEBUG_APP_KEY : RELEASE_APP_KEY;
