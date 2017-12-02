@@ -1,6 +1,5 @@
 package com.cielyang.android.login.common.http.impl;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.cielyang.android.login.common.http.HttpClient;
@@ -10,7 +9,9 @@ import com.cielyang.android.login.common.http.Response;
 import java.io.IOException;
 import java.util.Map;
 
+import okhttp3.Cache;
 import okhttp3.CacheControl;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
@@ -26,10 +27,18 @@ import okhttp3.ResponseBody;
  */
 public class OkHttpClientImpl implements HttpClient {
 
-    private final OkHttpClient mClient;
+    private OkHttpClient mClient;
 
-    public OkHttpClientImpl(Context context) {
-        mClient = new OkHttpClient.Builder().build();
+    public OkHttpClientImpl(Cache cache) {
+        mClient = new OkHttpClient.Builder().cache(cache).build();
+    }
+
+    public void addInterceptor(Interceptor interceptor) {
+        mClient = mClient.newBuilder().addInterceptor(interceptor).build();
+    }
+
+    public void addNetworkInterceptor(Interceptor interceptor) {
+        mClient = mClient.newBuilder().addNetworkInterceptor(interceptor).build();
     }
 
     @Override
