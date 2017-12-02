@@ -52,4 +52,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    // network
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.google.code.gson:gson:2.8.2'
+    // logger
+    implementation 'com.orhanobut:logger:2.1.1'
+    // toasty
+    implementation 'com.github.GrenderG:Toasty:1.2.5'
 }
