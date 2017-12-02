@@ -10,8 +10,7 @@ public class Api {
     // token 登录
     private static final String LOGIN_BY_TOKEN = "/users/me";
 
-    // 检查用户是否存在，使用 leancloud restful api 条件查询
-    // leancloud 文档地址：https://leancloud.cn/docs/rest_api.html#hash827796182
+    // 查询户是否存在
     // 传入的条件是 JSON 字符串
     private static final String QUERY_USER = "/users?where={condition}";
 
@@ -66,9 +65,13 @@ public class Api {
         return sDomain + LOGIN_BY_TOKEN;
     }
 
+    /**
+     * 使用 LeanCloud restful api 条件查询用户是否存在.
+     *
+     * @return the query user url
+     * @see <a href="https://leancloud.cn/docs/rest_api.html#hash827796182">LeanCloud 文档地址</a>
+     */
     public static String getQueryUserUrl() {
         return sDomain + QUERY_USER;
     }
 }
-
-
