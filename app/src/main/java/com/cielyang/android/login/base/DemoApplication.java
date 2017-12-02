@@ -3,6 +3,7 @@ package com.cielyang.android.login.base;
 import android.app.Application;
 
 import com.cielyang.android.login.BuildConfig;
+import com.cielyang.android.login.configs.Api;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
@@ -16,6 +17,11 @@ public class DemoApplication extends Application {
         super.onCreate();
 
         initLogger();
+        setApiType();
+    }
+
+    private void setApiType() {
+        Api.setDebug(BuildConfig.DEBUG);
     }
 
     private void initLogger() {
