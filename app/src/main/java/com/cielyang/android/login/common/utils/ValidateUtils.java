@@ -1,4 +1,4 @@
-package com.cielyang.android.login.common.util;
+package com.cielyang.android.login.common.utils;
 
 import android.os.Build;
 import android.text.Editable;
@@ -6,7 +6,10 @@ import android.text.TextUtils;
 import android.util.Patterns;
 
 /** 本项目专用工具类，用以验证用户输入内容. */
-public class ValidateUtil {
+public class ValidateUtils {
+
+    private ValidateUtils() {
+    }
 
     public static boolean isValidEmail(CharSequence target) {
         return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches();

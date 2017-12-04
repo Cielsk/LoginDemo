@@ -1,4 +1,4 @@
-package com.cielyang.android.login.common.util;
+package com.cielyang.android.login.common.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,11 +7,11 @@ import com.google.gson.Gson;
 import com.orhanobut.logger.Logger;
 
 /** */
-public class SharedPreferencesUtil {
+public class SharedPreferencesUtils {
 
     private SharedPreferences mPreferences;
 
-    public SharedPreferencesUtil(Context context, String fileName) {
+    public SharedPreferencesUtils(Context context, String fileName) {
         mPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
     }
 

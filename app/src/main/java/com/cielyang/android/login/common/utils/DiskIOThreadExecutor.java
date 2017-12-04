@@ -1,4 +1,4 @@
-package com.cielyang.android.login.common.util;
+package com.cielyang.android.login.common.utils;
 
 import android.support.annotation.NonNull;
 

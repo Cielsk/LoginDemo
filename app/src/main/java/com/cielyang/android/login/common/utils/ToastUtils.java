@@ -1,4 +1,4 @@
-package com.cielyang.android.login.common.util;
+package com.cielyang.android.login.common.utils;
 
 import android.content.Context;
 import android.widget.Toast;
@@ -6,7 +6,10 @@ import android.widget.Toast;
 import es.dmoral.toasty.Toasty;
 
 /** */
-public class ToastUtil {
+public class ToastUtils {
+
+    private ToastUtils() {
+    }
 
     public void error(Context context, CharSequence msg) {
         Toasty.error(context, msg, Toast.LENGTH_SHORT, true).show();
