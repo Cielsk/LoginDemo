@@ -1,8 +1,32 @@
 <resources>
-  <string name="app_name">Login</string>
+    <string name="app_name">Login</string>
 
-  <string name="navigation_drawer_open">Open navigation drawer</string>
-  <string name="navigation_drawer_close">Close navigation drawer</string>
+    <!-- Login page -->
+    <string name="login_greeting">Welcome</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="register_link">Not a member? Sign up now.</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_incorrect_password">Incorrect password</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="error_email_not_registered">Email not registered</string>
+    <string name="error_login_failed_unknown_cause">Login failed by unknown cause</string>
 
-  <string name="action_settings">Settings</string>
+    <!-- Register page -->
+    <string name="name_hint">Username</string>
+    <string name="error_short_password">Password is too short</string>
+    <string name="error_invalid_password">Invalid password</string>
+    <string name="btn_register">Register</string>
+    <string name="login_link">Already registered! Login me.</string>
+    <string name="error_register_failed_unknown_cause">Register failed by unknown cause</string>
+    <string name="error_email_existed">Email already existed</string>
+    <string name="error_username_existed">Username already existed</string>
+    <string name="error_invalid_username">Invalid username</string>
+
+    <!-- Main page -->
+    <string name="main_page_name">Main Page</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
 </resources>

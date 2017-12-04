@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">登录</string>
+    <string name="login_greeting">欢迎</string>
+    <string name="email_hint">电子邮箱</string>
+    <string name="password_hint">密码</string>
+    <string name="btn_login">登录</string>
+    <string name="name_hint">用户名</string>
+    <string name="btn_register">注册</string>
+    <string name="login_link">已经注册！我要登录。</string>
+    <string name="register_link">还没有帐号？马上注册。</string>
+    <string name="error_invalid_email">非法邮箱地址</string>
+    <string name="error_invalid_password">密码不符合要求</string>
+    <string name="error_incorrect_password">密码不正确</string>
+    <string name="error_field_required">此项必填</string>
+    <string name="error_short_password">密码太短了</string>
+    <string name="error_email_not_registered">此邮箱未注册</string>
+    <string name="error_login_failed_unknown_cause">未知原因导致登录失败</string>
+    <string name="error_register_failed_unknown_cause">未知原因导致注册失败</string>
+    <string name="error_email_existed">邮箱地址已被注册</string>
+    <string name="error_username_existed">用户名已被注册</string>
+    <string name="error_invalid_username">非法用户名</string>
+    <string name="navigation_drawer_open">打开侧滑菜单</string>
+    <string name="action_settings">设置</string>
+    <string name="navigation_drawer_close">关闭侧滑菜单</string>
+    <string name="main_page_name">主页</string>
+</resources>
