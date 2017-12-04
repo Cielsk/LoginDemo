@@ -1,16 +1,18 @@
 package com.cielyang.android.login.base;
 
-import android.app.Application;
-
 import com.cielyang.android.login.BuildConfig;
 import com.cielyang.android.login.configs.Api;
+import com.cielyang.android.login.di.DaggerAppComponent;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
 
+import dagger.android.AndroidInjector;
+import dagger.android.support.DaggerApplication;
+
 /** */
-public class DemoApplication extends Application {
+public class DemoApplication extends DaggerApplication {
 
     @Override
     public void onCreate() {
@@ -18,6 +20,8 @@ public class DemoApplication extends Application {
 
         initLogger();
         setApiType();
+
+        Logger.v("Demo application created.");
     }
 
     private void setApiType() {
@@ -25,7 +29,7 @@ public class DemoApplication extends Application {
     }
 
     private void initLogger() {
-        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder().tag("Login demo").build();
+        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder().tag("LoginDemo").build();
         Logger.addLogAdapter(
                 new AndroidLogAdapter(formatStrategy) {
                     @Override
@@ -33,5 +37,10 @@ public class DemoApplication extends Application {
                         return BuildConfig.DEBUG;
                     }
                 });
+    }
+
+    @Override
+    protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
+        return DaggerAppComponent.builder().application(this).build();
     }
 }

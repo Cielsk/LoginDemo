@@ -5,11 +5,16 @@ import static com.cielyang.android.login.configs.SharedPreferencesConfig.TOKEN_K
 import com.cielyang.android.login.common.utils.SharedPreferencesUtils;
 import com.cielyang.android.login.data.entities.Account;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** */
+@Singleton
 public class SessionDao {
 
     private SharedPreferencesUtils mSharedPreferencesUtils;
 
+    @Inject
     public SessionDao(SharedPreferencesUtils sharedPreferencesUtils) {
         mSharedPreferencesUtils = sharedPreferencesUtils;
     }

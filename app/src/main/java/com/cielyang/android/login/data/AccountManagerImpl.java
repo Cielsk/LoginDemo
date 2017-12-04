@@ -24,7 +24,11 @@ import com.cielyang.android.login.data.remote.CommonInterceptor;
 import com.cielyang.android.login.data.remote.UserQueryResponse;
 import com.google.gson.Gson;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** */
+@Singleton
 public class AccountManagerImpl implements AccountManager {
 
     private HttpClient mHttpClient;
@@ -35,8 +39,10 @@ public class AccountManagerImpl implements AccountManager {
 
     private Account mCachedAccount;
 
+    @Inject
     public AccountManagerImpl(
-            @NonNull OkHttpClientImpl httpClient, @NonNull SessionDao sessionDao,
+            @NonNull OkHttpClientImpl httpClient,
+            @NonNull SessionDao sessionDao,
             @NonNull AppExecutors appExecutors) {
         httpClient.addNetworkInterceptor(new CommonInterceptor());
         mHttpClient = httpClient;
@@ -60,7 +66,7 @@ public class AccountManagerImpl implements AccountManager {
 
                     if (response.getCode() == Response.STATE_OK) {
                         Account account = new Gson().fromJson(response.getData(), Account.class);
-                        mSessionDao.saveSession(account);
+                        saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onLoginSucceed);
                     } else {
@@ -96,7 +102,7 @@ public class AccountManagerImpl implements AccountManager {
 
                     if (response.getCode() == Response.STATE_OK) {
                         Account account = new Gson().fromJson(response.getData(), Account.class);
-                        mSessionDao.saveSession(account);
+                        saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onLoginSucceed);
                     } else {
@@ -134,7 +140,7 @@ public class AccountManagerImpl implements AccountManager {
 
                     if (response.getCode() == Response.STATE_OK) {
                         Account account = new Gson().fromJson(response.getData(), Account.class);
-                        mSessionDao.saveSession(account);
+                        saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onRegisterSucceed);
                     } else {
@@ -157,6 +163,10 @@ public class AccountManagerImpl implements AccountManager {
         mAppExecutors.networkIO().execute(runnable);
     }
 
+    private void saveAccountSession(Account account) {
+        mAppExecutors.diskIO().execute(() -> mSessionDao.saveSession(account));
+    }
+
     @Override
     public void queryUserByName(@NonNull CharSequence username, @NonNull QueryCallback callback) {
         queryUser("username", username, callback);
@@ -165,11 +175,6 @@ public class AccountManagerImpl implements AccountManager {
     @Override
     public void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryCallback callback) {
         queryUser("email", email, callback);
-    }
-
-    @Override
-    public Account getAccount() {
-        return mCachedAccount;
     }
 
     private void queryUser(
@@ -199,5 +204,10 @@ public class AccountManagerImpl implements AccountManager {
                 };
 
         mAppExecutors.networkIO().execute(runnable);
+    }
+
+    @Override
+    public Account getAccount() {
+        return mCachedAccount;
     }
 }

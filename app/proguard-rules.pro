@@ -20,6 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# rules for Dagger 2
+-dontwarn com.google.errorprone.annotations.**
+
 # rules for okhttp
 -dontwarn okhttp3.**
 -dontwarn okio.**

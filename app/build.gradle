@@ -60,4 +60,9 @@ dependencies {
     implementation 'com.orhanobut:logger:2.1.1'
     // toasty
     implementation 'com.github.GrenderG:Toasty:1.2.5'
+    // dagger2
+    implementation 'com.google.dagger:dagger:2.13'
+    implementation 'com.google.dagger:dagger-android-support:2.13'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.13'
 }
