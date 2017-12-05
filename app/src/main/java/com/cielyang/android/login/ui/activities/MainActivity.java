@@ -1,5 +1,7 @@
 package com.cielyang.android.login.ui.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +19,10 @@ import com.cielyang.android.login.R;
 
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
+
+    static void actionStart(@NonNull Context context) {
+        context.startActivity(new Intent(context, MainActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -24,4 +24,7 @@
     <string name="action_settings">设置</string>
     <string name="navigation_drawer_close">关闭侧滑菜单</string>
     <string name="main_page_name">主页</string>
+    <string name="msg_success_login">登录成功！</string>
+    <string name="msg_success_register">注册成功！</string>
+    <string name="msg_token_expired">登录凭证过期</string>
 </resources>

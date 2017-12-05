@@ -7,12 +7,14 @@ import com.cielyang.android.login.data.entities.Account;
 /** */
 public interface AccountManager {
 
+    void checkSessionToken(CheckSessionTokenCallback callback);
+
     void loginByEmail(
             @NonNull CharSequence email,
             @NonNull CharSequence password,
             @NonNull LoginByEmailCallback callback);
 
-    void loginByToken(@NonNull CharSequence token, @NonNull LoginByTokenCallback callback);
+    void loginByToken(@NonNull LoginByTokenCallback callback);
 
     void register(
             @NonNull CharSequence username,
@@ -25,6 +27,13 @@ public interface AccountManager {
     void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryCallback callback);
 
     Account getAccount();
+
+    interface CheckSessionTokenCallback {
+
+        void onTokenSaved();
+
+        void onTokenNotSaved();
+    }
 
     interface LoginByEmailCallback {
 

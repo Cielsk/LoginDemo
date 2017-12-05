@@ -6,6 +6,7 @@ import static com.cielyang.android.login.configs.leancloud.RequestBody.REGISTER_
 import static com.cielyang.android.login.configs.leancloud.RequestBody.USERNAME_PARAM_NAME;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.cielyang.android.login.common.http.HttpClient;
 import com.cielyang.android.login.common.http.Request;
@@ -51,6 +52,20 @@ public class AccountManagerImpl implements AccountManager {
     }
 
     @Override
+    public void checkSessionToken(CheckSessionTokenCallback callback) {
+        Runnable runnable =
+                () -> {
+                    if (TextUtils.isEmpty(mSessionDao.getSessionToken())) {
+                        mAppExecutors.mainThread().execute(callback::onTokenNotSaved);
+                    } else {
+                        mAppExecutors.mainThread().execute(callback::onTokenSaved);
+                    }
+                };
+
+        mAppExecutors.diskIO().execute(runnable);
+    }
+
+    @Override
     public void loginByEmail(
             @NonNull CharSequence email,
             @NonNull CharSequence password,
@@ -90,12 +105,12 @@ public class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public void loginByToken(@NonNull CharSequence token, @NonNull LoginByTokenCallback callback) {
+    public void loginByToken(@NonNull LoginByTokenCallback callback) {
         Runnable runnable =
                 () -> {
+                    String token = mSessionDao.getSessionToken();
                     BaseRequest request = new BaseRequest(Api.getLoginByTokenUrl());
-                    request.setHeaderField(
-                            RequestHeader.SESSION_TOKEN_PARAMETER_NAME, token.toString());
+                    request.setHeaderField(RequestHeader.SESSION_TOKEN_PARAMETER_NAME, token);
                     request.setMethod(Request.GET);
 
                     BaseResponse response = (BaseResponse) mHttpClient.post(request, false);

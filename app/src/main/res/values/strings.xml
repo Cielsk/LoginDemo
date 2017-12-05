@@ -12,6 +12,8 @@
     <string name="error_field_required">This field is required</string>
     <string name="error_email_not_registered">Email not registered</string>
     <string name="error_login_failed_unknown_cause">Login failed by unknown cause</string>
+    <string name="msg_success_login">Login succeed!</string>
+    <string name="msg_token_expired">Login expired</string>
 
     <!-- Register page -->
     <string name="name_hint">Username</string>
@@ -23,6 +25,7 @@
     <string name="error_email_existed">Email already existed</string>
     <string name="error_username_existed">Username already existed</string>
     <string name="error_invalid_username">Invalid username</string>
+    <string name="msg_success_register">Register succeed!</string>
 
     <!-- Main page -->
     <string name="main_page_name">Main Page</string>
