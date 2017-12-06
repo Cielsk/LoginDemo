@@ -24,6 +24,7 @@ import com.cielyang.android.login.ui.activities.MainActivity;
 
 import javax.inject.Inject;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -37,8 +38,10 @@ import butterknife.Unbinder;
 public class LoginFragment extends BaseFragment implements AccountManager.LoginByEmailCallback {
 
     private static final String ARG_EMAIL = "param1";
+
     @Inject
     AccountManager mAccountManager;
+
     @BindView(R.id.edit_text_email)
     TextInputEditText mEditTextEmail;
 
@@ -56,6 +59,24 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     @BindView(R.id.link_register)
     TextView mLinkRegister;
+
+    @BindString(R.string.error_invalid_email)
+    String mErrorInvalidEmail;
+
+    @BindString(R.string.error_incorrect_password)
+    String mErrorIncorrectPwd;
+
+    @BindString(R.string.error_field_required)
+    String mErrorFiledRequired;
+
+    @BindString(R.string.error_email_not_registered)
+    String mErrorEmailNotRegistered;
+
+    @BindString(R.string.error_login_failed_unknown_cause)
+    String mErrorLoginFailedUnknownCause;
+
+    @BindString(R.string.msg_success_login)
+    String mMsgLoginSuccess;
 
     Unbinder unbinder;
 
@@ -153,27 +174,21 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
                         if (TextUtils.isEmpty(editable)) {
                             mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(false);
                             errorEmptyPassword();
-                        } else if (ValidateUtils.isShortPassword(editable)) {
-                            errorShortPassword();
                         }
                     }
                 });
     }
 
     private void errorInvalidEmail() {
-        mTextInputLayoutEmail.setError(getString(R.string.error_invalid_email));
+        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
     }
 
     private void errorEmptyEmail() {
-        mTextInputLayoutEmail.setError(getString(R.string.error_field_required));
-    }
-
-    private void errorShortPassword() {
-        mTextInputLayoutPwd.setError(getString(R.string.error_short_password));
+        mTextInputLayoutEmail.setError(mErrorFiledRequired);
     }
 
     private void errorEmptyPassword() {
-        mTextInputLayoutPwd.setError(getString(R.string.error_field_required));
+        mTextInputLayoutPwd.setError(mErrorFiledRequired);
     }
 
     @Override
@@ -201,7 +216,11 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     @OnClick(R.id.btn_login)
     public void onBtnLoginClicked() {
-        if (isValidInput()) mAccountManager.loginByEmail(mEmail, mPwd, this);
+        if (isValidInput()) {
+            mListener.showLoadingIndicator(true);
+            mBtnLogin.setEnabled(false);
+            mAccountManager.loginByEmail(mEmail, mPwd, this);
+        }
     }
 
     private boolean isValidInput() {
@@ -215,7 +234,7 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     public void errorEmailNotExisted() {
         clearErrorEmail();
-        mTextInputLayoutEmail.setError(getString(R.string.error_email_not_registered));
+        mTextInputLayoutEmail.setError(mErrorEmailNotRegistered);
     }
 
     @OnClick(R.id.link_register)
@@ -237,29 +256,37 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     @Override
     public void onLoginSucceed() {
-        ToastUtils.success(mActivity, getString(R.string.msg_success_login));
+        mListener.showLoadingIndicator(false);
+        mBtnLogin.setEnabled(true);
+        ToastUtils.success(mActivity, mMsgLoginSuccess);
         launchMainPage();
     }
 
     @Override
     public void onEmailNotExisted() {
+        mListener.showLoadingIndicator(false);
+        mBtnLogin.setEnabled(true);
         errorEmailNotExisted();
     }
 
     @Override
     public void onPasswordIncorrect() {
-        clearErrorPwd();
-        mTextInputLayoutPwd.setError(getString(R.string.error_incorrect_password));
-        mEditTextPwd.setText(null);
+        mListener.showLoadingIndicator(false);
+        mBtnLogin.setEnabled(true);
+        mTextInputLayoutPwd.setError(mErrorIncorrectPwd);
     }
 
     @Override
     public void onLoginFailed() {
-        ToastUtils.error(mActivity, getString(R.string.error_login_failed_unknown_cause));
+        mListener.showLoadingIndicator(false);
+        mBtnLogin.setEnabled(true);
+        ToastUtils.error(mActivity, mErrorLoginFailedUnknownCause);
     }
 
     public interface OnClickedListener {
 
         void onRegisterLinkClicked();
+
+        void showLoadingIndicator(boolean shown);
     }
 }

@@ -24,6 +24,7 @@ import com.cielyang.android.login.ui.activities.MainActivity;
 
 import javax.inject.Inject;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -60,9 +61,38 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
     @BindView(R.id.link_login)
     TextView mLinkLogin;
 
+    @BindString(R.string.error_invalid_username)
+    String mErrorInvalidUsername;
+
+    @BindString(R.string.error_invalid_email)
+    String mErrorInvalidEmail;
+
+    @BindString(R.string.error_short_password)
+    String mErrorShortPwd;
+
+    @BindString(R.string.error_invalid_password)
+    String mErrorInvalidPwd;
+
+    @BindString(R.string.error_username_existed)
+    String mErrorUsernameExisted;
+
+    @BindString(R.string.error_email_existed)
+    String mErrorEmailExisted;
+
+    @BindString(R.string.error_register_failed_unknown_cause)
+    String mErrorRegisterFailedUnknownCause;
+
+    @BindString(R.string.error_field_required)
+    String mErrorFieldRequired;
+
+    @BindString(R.string.msg_success_register)
+    String mMsgRegisterSuccess;
+
     Unbinder unbinder;
+
     @Inject
     AccountManager mAccountManager;
+
     private OnClickedListener mListener;
     private Context mActivity;
 
@@ -195,7 +225,11 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
 
     @OnClick(R.id.btn_register)
     public void onBtnRegisterClicked() {
-        if (isValidInput()) mAccountManager.register(mUsername, mEmail, mPwd, this);
+        if (isValidInput()) {
+            mListener.showLoadingIndicator(true);
+            mBtnRegister.setEnabled(false);
+            mAccountManager.register(mUsername, mEmail, mPwd, this);
+        }
     }
 
     private boolean isValidInput() {
@@ -227,37 +261,31 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
     }
 
     private void errorEmptyUsername() {
-        mTextInputLayoutUsername.setError(getString(R.string.error_field_required));
+        mTextInputLayoutUsername.setError(mErrorFieldRequired);
     }
 
     private void errorInvalidUsername() {
-        mTextInputLayoutUsername.setError(getString(R.string.error_invalid_username));
+        mTextInputLayoutUsername.setError(mErrorInvalidUsername);
     }
 
     private void errorEmptyEmail() {
-        mTextInputLayoutEmail.setError(getString(R.string.error_field_required));
+        mTextInputLayoutEmail.setError(mErrorFieldRequired);
     }
 
     private void errorInvalidEmail() {
-        mTextInputLayoutEmail.setError(getString(R.string.error_invalid_email));
+        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
     }
 
     private void errorEmptyPassword() {
-        mTextInputLayoutPassword.setError(getString(R.string.error_field_required));
+        mTextInputLayoutPassword.setError(mErrorFieldRequired);
     }
 
     private void errorShortPassword() {
-        mTextInputLayoutPassword.setError(getString(R.string.error_short_password));
+        mTextInputLayoutPassword.setError(mErrorShortPwd);
     }
 
     private void errorInvalidPassword() {
-        mTextInputLayoutPassword.setError(getString(R.string.error_invalid_password));
-    }
-
-    @Override
-    public void onRegisterSucceed() {
-        ToastUtils.success(mActivity, getString(R.string.msg_success_register));
-        launchMainPage();
+        mTextInputLayoutPassword.setError(mErrorInvalidPwd);
     }
 
     private void launchMainPage() {
@@ -265,22 +293,38 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
     }
 
     @Override
+    public void onRegisterSucceed() {
+        mListener.showLoadingIndicator(false);
+        mBtnRegister.setEnabled(true);
+        ToastUtils.success(mActivity, mMsgRegisterSuccess);
+        launchMainPage();
+    }
+
+    @Override
     public void onUsernameExisted() {
-        mTextInputLayoutUsername.setError(getString(R.string.error_username_existed));
+        mListener.showLoadingIndicator(false);
+        mBtnRegister.setEnabled(true);
+        mTextInputLayoutUsername.setError(mErrorUsernameExisted);
     }
 
     @Override
     public void onEmailExisted() {
-        mTextInputLayoutEmail.setError(getString(R.string.error_email_existed));
+        mListener.showLoadingIndicator(false);
+        mBtnRegister.setEnabled(true);
+        mTextInputLayoutEmail.setError(mErrorEmailExisted);
     }
 
     @Override
     public void onRegisterFailed() {
-        ToastUtils.error(mActivity, getString(R.string.error_register_failed_unknown_cause));
+        mListener.showLoadingIndicator(false);
+        mBtnRegister.setEnabled(true);
+        ToastUtils.error(mActivity, mErrorRegisterFailedUnknownCause);
     }
 
     public interface OnClickedListener {
 
         void onLoginLinkClicked();
+
+        void showLoadingIndicator(boolean shown);
     }
 }

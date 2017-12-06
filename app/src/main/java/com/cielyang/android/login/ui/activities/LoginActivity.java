@@ -7,6 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
@@ -24,6 +28,10 @@ public class LoginActivity extends BaseActivity
     private FragmentManager mFragmentManager;
 
     private Fragment mFragment;
+
+    private boolean mIsLoadingIndicatorShowing;
+
+    private ProgressBar mProgressBar;
 
     public static void actionStart(@NonNull Context context) {
         context.startActivity(new Intent(context, LoginActivity.class));
@@ -45,6 +53,7 @@ public class LoginActivity extends BaseActivity
             transaction.add(R.id.fragment_container, mFragment);
             transaction.commit();
         }
+        mIsLoadingIndicatorShowing = false;
     }
 
     @Override
@@ -55,6 +64,23 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onRegisterLinkClicked() {
         replaceFragmentWith(RegisterFragment.newInstance());
+    }
+
+    @Override
+    public void showLoadingIndicator(boolean shown) {
+        if (mIsLoadingIndicatorShowing == shown) return;
+        if (mIsLoadingIndicatorShowing) {
+            mProgressBar.setVisibility(View.GONE);
+        } else {
+            if (mProgressBar == null) {
+                LayoutInflater inflater = LayoutInflater.from(this);
+                ViewGroup container = findViewById(android.R.id.content);
+                View view = inflater.inflate(R.layout.progressbar_circle_large, container);
+                mProgressBar = view.findViewById(R.id.progressbar);
+            }
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+        mIsLoadingIndicatorShowing = shown;
     }
 
     private void replaceFragmentWith(Fragment fragment) {
