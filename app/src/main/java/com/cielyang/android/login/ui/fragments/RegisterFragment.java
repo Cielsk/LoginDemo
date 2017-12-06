@@ -13,6 +13,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cielyang.android.login.R;
@@ -35,7 +36,10 @@ import butterknife.Unbinder;
  * {@link OnClickedListener} interface to handle interaction events. Use the {@link
  * RegisterFragment#newInstance} factory method to create an instance of this fragment.
  */
-public class RegisterFragment extends BaseFragment implements AccountManager.RegisterCallback {
+public class RegisterFragment extends BaseFragment
+        implements AccountManager.RegisterCallback,
+        AccountManager.QueryEmailCallback,
+        AccountManager.QueryUsernameCallback {
 
     @BindView(R.id.edit_text_username)
     TextInputEditText mEditTextUsername;
@@ -144,6 +148,13 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
                         }
                     }
                 });
+        mEditTextUsername.setOnFocusChangeListener(
+                (view, hasFocus) -> {
+                    if (!hasFocus && view != null) {
+                        CharSequence username = ((EditText) view).getText();
+                        checkUsernameRegisteredOrNot(username);
+                    }
+                });
 
         mEditTextEmail.addTextChangedListener(
                 new TextWatcher() {
@@ -167,6 +178,13 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
                         } else if (!ValidateUtils.isValidEmail(editable)) {
                             errorInvalidEmail();
                         }
+                    }
+                });
+        mEditTextEmail.setOnFocusChangeListener(
+                (view, hasFocus) -> {
+                    if (!hasFocus && view != null) {
+                        CharSequence email = ((EditText) view).getText();
+                        checkEmailRegisteredOrNot(email);
                     }
                 });
 
@@ -198,6 +216,14 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
                         }
                     }
                 });
+    }
+
+    private void checkEmailRegisteredOrNot(CharSequence email) {
+        mAccountManager.queryUserByEmail(email, this);
+    }
+
+    private void checkUsernameRegisteredOrNot(CharSequence username) {
+        mAccountManager.queryUserByName(username, this);
     }
 
     @Override
@@ -319,6 +345,26 @@ public class RegisterFragment extends BaseFragment implements AccountManager.Reg
         mListener.showLoadingIndicator(false);
         mBtnRegister.setEnabled(true);
         ToastUtils.error(mActivity, mErrorRegisterFailedUnknownCause);
+    }
+
+    @Override
+    public void onUsernameRegistered() {
+        mTextInputLayoutUsername.setError(mErrorUsernameExisted);
+    }
+
+    @Override
+    public void onUsernameNotRegistered() {
+        // do nothing
+    }
+
+    @Override
+    public void onEmailRegistered() {
+        mTextInputLayoutEmail.setError(mErrorEmailExisted);
+    }
+
+    @Override
+    public void onEmailNotRegistered() {
+        // do nothing
     }
 
     public interface OnClickedListener {

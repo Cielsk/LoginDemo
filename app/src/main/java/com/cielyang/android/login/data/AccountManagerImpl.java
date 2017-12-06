@@ -179,23 +179,12 @@ public class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public void queryUserByName(@NonNull CharSequence username, @NonNull QueryCallback callback) {
-        queryUser("username", username, callback);
-    }
-
-    @Override
-    public void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryCallback callback) {
-        queryUser("email", email, callback);
-    }
-
-    private void queryUser(
-            @NonNull CharSequence key,
-            @NonNull CharSequence value,
-            @NonNull QueryCallback callback) {
+    public void queryUserByName(
+            @NonNull CharSequence username, @NonNull QueryUsernameCallback callback) {
         Runnable runnable =
                 () -> {
                     BaseRequest request = new BaseRequest(Api.getQueryUserUrl());
-                    String condition = String.format("{\"%s\":\"%s\"}", key, value);
+                    String condition = String.format("{\"%s\":\"%s\"}", "username", username);
                     request.setBodyField(Api.QUERY_PARAM_NAME, condition);
 
                     BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
@@ -204,12 +193,35 @@ public class AccountManagerImpl implements AccountManager {
                         UserQueryResponse queryResponse =
                                 new Gson().fromJson(response.getData(), UserQueryResponse.class);
                         if (queryResponse.getResults().size() > 0) {
-                            mAppExecutors.mainThread().execute(callback::onUserExisted);
+                            mAppExecutors.mainThread().execute(callback::onUsernameRegistered);
                         } else {
-                            mAppExecutors.mainThread().execute(callback::onUserNotExisted);
+                            mAppExecutors.mainThread().execute(callback::onUsernameNotRegistered);
                         }
-                    } else {
-                        mAppExecutors.mainThread().execute(callback::onQueryFailed);
+                    }
+                };
+
+        mAppExecutors.networkIO().execute(runnable);
+    }
+
+    @Override
+    public void queryUserByEmail(
+            @NonNull CharSequence email, @NonNull QueryEmailCallback callback) {
+        Runnable runnable =
+                () -> {
+                    BaseRequest request = new BaseRequest(Api.getQueryUserUrl());
+                    String condition = String.format("{\"%s\":\"%s\"}", "email", email);
+                    request.setBodyField(Api.QUERY_PARAM_NAME, condition);
+
+                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
+
+                    if (response.getCode() == Response.STATE_OK) {
+                        UserQueryResponse queryResponse =
+                                new Gson().fromJson(response.getData(), UserQueryResponse.class);
+                        if (queryResponse.getResults().size() > 0) {
+                            mAppExecutors.mainThread().execute(callback::onEmailRegistered);
+                        } else {
+                            mAppExecutors.mainThread().execute(callback::onEmailNotRegistered);
+                        }
                     }
                 };
 

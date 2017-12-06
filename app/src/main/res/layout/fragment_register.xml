@@ -68,7 +68,7 @@
         app:hintTextAppearance="@style/TextAppearance.Design.Hint"
         app:passwordToggleDrawable="@drawable/ic_visibility_toggle"
         app:passwordToggleEnabled="false"
-        app:passwordToggleTint="@color/colorSecondaryText">
+        app:passwordToggleTint="@color/textColorSecondary">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/edit_text_password"

@@ -22,9 +22,9 @@ public interface AccountManager {
             @NonNull CharSequence password,
             @NonNull RegisterCallback callback);
 
-    void queryUserByName(@NonNull CharSequence username, @NonNull QueryCallback callback);
+    void queryUserByName(@NonNull CharSequence username, @NonNull QueryUsernameCallback callback);
 
-    void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryCallback callback);
+    void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryEmailCallback callback);
 
     Account getAccount();
 
@@ -66,12 +66,17 @@ public interface AccountManager {
         void onRegisterFailed();
     }
 
-    interface QueryCallback {
+    interface QueryUsernameCallback {
 
-        void onUserExisted();
+        void onUsernameRegistered();
 
-        void onUserNotExisted();
+        void onUsernameNotRegistered();
+    }
 
-        void onQueryFailed();
+    interface QueryEmailCallback {
+
+        void onEmailRegistered();
+
+        void onEmailNotRegistered();
     }
 }
