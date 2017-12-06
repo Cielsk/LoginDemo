@@ -153,7 +153,7 @@ public class AccountManagerImpl implements AccountManager {
 
                     BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
 
-                    if (response.getCode() == Response.STATE_OK) {
+                    if (response.getCode() == Response.STATE_CREATED) {
                         Account account = new Gson().fromJson(response.getData(), Account.class);
                         saveAccountSession(account);
                         mCachedAccount = account;

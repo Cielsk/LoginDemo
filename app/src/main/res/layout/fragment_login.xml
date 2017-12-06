@@ -3,14 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical"
     android:orientation="vertical"
     tools:context="com.cielyang.android.login.ui.fragments.LoginFragment">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/content_vertical_spacing"
+        android:layout_height="@dimen/content_header_height"
+        android:layout_marginBottom="@dimen/section_vertical_spacing"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:gravity="center"
         android:text="@string/login_greeting"
         android:textColor="@color/colorPrimaryDark"
@@ -21,11 +21,10 @@
         style="@style/Widget.Design.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/content_vertical_spacing"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/content_vertical_spacing"
-        app:hintEnabled="false"
+        android:layout_marginTop="@dimen/section_vertical_spacing"
+        app:errorTextAppearance="@style/TextAppearance.Design.Error"
         app:hintTextAppearance="@style/TextAppearance.Design.Hint">
 
         <android.support.design.widget.TextInputEditText
@@ -43,11 +42,11 @@
         style="@style/Widget.Design.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/content_vertical_spacing"
+        android:layout_marginBottom="@dimen/section_vertical_spacing"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/content_vertical_spacing"
-        app:hintEnabled="false"
+        app:errorTextAppearance="@style/TextAppearance.Design.Error"
+        app:hintTextAppearance="@style/TextAppearance.Design.Hint"
         app:passwordToggleEnabled="false"
         app:passwordToggleTint="@color/colorSecondaryText">
 
@@ -65,10 +64,10 @@
         style="@style/Base.Widget.AppCompat.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/content_vertical_spacing"
+        android:layout_marginBottom="@dimen/section_vertical_spacing"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/content_vertical_spacing"
+        android:layout_marginTop="@dimen/section_vertical_spacing"
         android:background="@drawable/shape_btn_login"
         android:text="@string/btn_login"
         android:textColor="@color/colorIcons"
@@ -79,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/flat_button_height"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/content_vertical_spacing"
+        android:layout_marginTop="@dimen/section_vertical_spacing"
         android:gravity="center"
         android:text="@string/register_link"
         android:textColor="@color/colorAccent"

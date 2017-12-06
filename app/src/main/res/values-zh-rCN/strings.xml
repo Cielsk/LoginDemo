@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">登录</string>
-    <string name="login_greeting">欢迎</string>
+    <string name="login_greeting">登录</string>
+    <string name="register_greeting">注册</string>
     <string name="email_hint">电子邮箱</string>
     <string name="password_hint">密码</string>
     <string name="btn_login">登录</string>

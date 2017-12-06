@@ -20,7 +20,7 @@ import com.cielyang.android.login.R;
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
-    static void actionStart(@NonNull Context context) {
+    public static void actionStart(@NonNull Context context) {
         context.startActivity(new Intent(context, MainActivity.class));
     }
 

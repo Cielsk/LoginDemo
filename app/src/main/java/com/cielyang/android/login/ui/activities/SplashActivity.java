@@ -30,14 +30,20 @@ public class SplashActivity extends BaseActivity {
 
     @Inject AccountManager mAccountManager;
     AppExecutors mAppExecutors;
-    private CheckCallback mCheckCallback = new CheckCallback();
-    private LoginCallBack mLoginCallBack = new LoginCallBack();
+    private CheckCallback mCheckCallback;
+    private LoginCallBack mLoginCallBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        init();
         checkSessionToken();
+    }
+
+    private void init() {
+        mCheckCallback = new CheckCallback();
+        mLoginCallBack = new LoginCallBack();
     }
 
     private void checkSessionToken() {

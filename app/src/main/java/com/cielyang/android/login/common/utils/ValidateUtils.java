@@ -1,7 +1,6 @@
 package com.cielyang.android.login.common.utils;
 
 import android.os.Build;
-import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Patterns;
 
@@ -35,7 +34,7 @@ public class ValidateUtils {
         return !TextUtils.isDigitsOnly(password);
     }
 
-    public static boolean isValidUsername(Editable username) {
+    public static boolean isValidUsername(CharSequence username) {
         // 英文字母或数字
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return username.codePoints().allMatch(Character::isLetterOrDigit);
