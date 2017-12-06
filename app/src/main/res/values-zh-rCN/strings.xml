@@ -28,4 +28,12 @@
     <string name="msg_success_login">登录成功！</string>
     <string name="msg_success_register">注册成功！</string>
     <string name="msg_token_expired">登录凭证过期</string>
+    <string name="avatarDescription">头像</string>
+    <string name="photo">照片</string>
+    <string name="gallery">图片库</string>
+    <string name="slideshow">幻灯片</string>
+    <string name="tools">工具</string>
+    <string name="communicate">交流</string>
+    <string name="share">分享</string>
+    <string name="send">发送</string>
 </resources>

@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.cielyang.android.login.common.http.HttpClient;
-import com.cielyang.android.login.common.http.Request;
 import com.cielyang.android.login.common.http.Response;
 import com.cielyang.android.login.common.http.impl.BaseRequest;
 import com.cielyang.android.login.common.http.impl.BaseResponse;
@@ -73,7 +72,6 @@ public class AccountManagerImpl implements AccountManager {
         Runnable runnable =
                 () -> {
                     BaseRequest request = new BaseRequest(Api.getLoginUrl());
-                    request.setMethod(Request.POST);
                     request.setBodyField(LOGIN_EMAIL_PARAM_NAME, email.toString());
                     request.setBodyField(PASSWORD_PARAM_NAME, password.toString());
 
@@ -111,9 +109,8 @@ public class AccountManagerImpl implements AccountManager {
                     String token = mSessionDao.getSessionToken();
                     BaseRequest request = new BaseRequest(Api.getLoginByTokenUrl());
                     request.setHeaderField(RequestHeader.SESSION_TOKEN_PARAMETER_NAME, token);
-                    request.setMethod(Request.GET);
 
-                    BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
+                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
 
                     if (response.getCode() == Response.STATE_OK) {
                         Account account = new Gson().fromJson(response.getData(), Account.class);
@@ -146,7 +143,6 @@ public class AccountManagerImpl implements AccountManager {
         Runnable runnable =
                 () -> {
                     BaseRequest request = new BaseRequest(Api.getRegisterUrl());
-                    request.setMethod(Request.POST);
                     request.setBodyField(USERNAME_PARAM_NAME, username.toString());
                     request.setBodyField(REGISTER_EMAIL_PARAM_NAME, email.toString());
                     request.setBodyField(PASSWORD_PARAM_NAME, password.toString());
@@ -199,11 +195,10 @@ public class AccountManagerImpl implements AccountManager {
         Runnable runnable =
                 () -> {
                     BaseRequest request = new BaseRequest(Api.getQueryUserUrl());
-                    request.setMethod(Request.GET);
                     String condition = String.format("{\"%s\":\"%s\"}", key, value);
                     request.setBodyField(Api.QUERY_PARAM_NAME, condition);
 
-                    BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
+                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
 
                     if (response.getCode() == Response.STATE_OK) {
                         UserQueryResponse queryResponse =

@@ -44,7 +44,7 @@ public class OkHttpClientImpl implements HttpClient {
     @Override
     public Response get(@NonNull Request request, boolean forceCache) {
         request.setMethod(Request.GET);
-        Builder builder = getRequestBuilder(request, forceCache);
+        Builder builder = getRequestBuilder(request, forceCache).get();
 
         return execute(builder.build());
     }
@@ -79,7 +79,7 @@ public class OkHttpClientImpl implements HttpClient {
     public Response delete(@NonNull Request request, boolean forceCache) {
         request.setMethod(Request.DELETE);
 
-        Builder builder = getRequestBuilder(request, forceCache);
+        Builder builder = getRequestBuilder(request, forceCache).delete();
 
         return execute(builder.build());
     }
@@ -94,7 +94,7 @@ public class OkHttpClientImpl implements HttpClient {
 
         String url = request.getUrl();
 
-        builder.url(url).get();
+        builder.url(url);
         if (forceCache) {
             builder.cacheControl(CacheControl.FORCE_CACHE);
         }
