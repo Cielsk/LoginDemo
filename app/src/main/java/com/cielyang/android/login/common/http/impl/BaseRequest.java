@@ -8,16 +8,22 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import dagger.Lazy;
+
 /**
  * Basic request class implements {@link Request}.
  *
  * <p>A request URL can be updated dynamically using replacement blocks and parameters on the
- * method. A replacement block is an alphanumeric string surrounded by { and }.</p>
+ * method. A replacement block is an alphanumeric string surrounded by { and }.
  *
- * <p>A request body is a json string.</p>
+ * <p>A request body is a json string.
  */
 public class BaseRequest implements Request {
 
+    @Inject
+    Lazy<Gson> mGsonInjector;
     // the default method is POST
     private String mMethod = "POST";
     private String mUrl;
@@ -69,7 +75,7 @@ public class BaseRequest implements Request {
     @Override
     public Object getBody() {
         if (mBody != null) {
-            return new Gson().toJson(mBody, HashMap.class);
+            return mGsonInjector.get().toJson(mBody, HashMap.class);
         }
 
         // return empty json string by default

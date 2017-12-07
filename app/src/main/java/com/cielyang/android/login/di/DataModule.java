@@ -5,10 +5,11 @@ import android.support.annotation.NonNull;
 
 import com.cielyang.android.login.common.http.impl.OkHttpClientImpl;
 import com.cielyang.android.login.common.utils.AppExecutors;
-import com.cielyang.android.login.common.utils.SharedPreferencesUtils;
+import com.cielyang.android.login.common.utils.SharedPrefsUtil;
 import com.cielyang.android.login.configs.SharedPreferencesConfig;
 import com.cielyang.android.login.data.AccountManager;
 import com.cielyang.android.login.data.AccountManagerImpl;
+import com.google.gson.Gson;
 
 import java.io.File;
 
@@ -25,6 +26,12 @@ public abstract class DataModule {
 
     @Provides
     @Singleton
+    static Gson provideGson() {
+        return new Gson();
+    }
+
+    @Provides
+    @Singleton
     static OkHttpClientImpl provideHttpClient(@NonNull Context context) {
         File file = context.getCacheDir();
         Cache cache = new Cache(file, SharedPreferencesConfig.CACHE_SIZE);
@@ -33,8 +40,8 @@ public abstract class DataModule {
 
     @Provides
     @Singleton
-    static SharedPreferencesUtils provideSharedPrefsUtils(@NonNull Context context) {
-        return new SharedPreferencesUtils(context, SharedPreferencesConfig.TOKEN_FILE_NMAE);
+    static SharedPrefsUtil provideSharedPrefsUtils(@NonNull Context context) {
+        return new SharedPrefsUtil(context, SharedPreferencesConfig.TOKEN_FILE_NMAE);
     }
 
     @Provides

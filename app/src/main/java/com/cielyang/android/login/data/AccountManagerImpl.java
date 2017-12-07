@@ -27,16 +27,17 @@ import com.google.gson.Gson;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /** */
 @Singleton
 public class AccountManagerImpl implements AccountManager {
 
+    @Inject
+    Lazy<Gson> mGsonInjector;
     private HttpClient mHttpClient;
-
     private AppExecutors mAppExecutors;
-
     private SessionDao mSessionDao;
-
     private Account mCachedAccount;
 
     @Inject
@@ -78,13 +79,15 @@ public class AccountManagerImpl implements AccountManager {
                     BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
 
                     if (response.getCode() == Response.STATE_OK) {
-                        Account account = new Gson().fromJson(response.getData(), Account.class);
+                        Account account = mGsonInjector.get().fromJson(response.getData(),
+                                Account.class);
                         saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onLoginSucceed);
                     } else {
                         ErrorResponse errorResponse =
-                                new Gson().fromJson(response.getData(), ErrorResponse.class);
+                                mGsonInjector.get().fromJson(response.getData(),
+                                        ErrorResponse.class);
                         switch (errorResponse.getCode()) {
                             case ErrorCode.USER_NOT_REGISTERED:
                                 mAppExecutors.mainThread().execute(callback::onEmailNotExisted);
@@ -113,13 +116,15 @@ public class AccountManagerImpl implements AccountManager {
                     BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
 
                     if (response.getCode() == Response.STATE_OK) {
-                        Account account = new Gson().fromJson(response.getData(), Account.class);
+                        Account account = mGsonInjector.get().fromJson(response.getData(),
+                                Account.class);
                         saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onLoginSucceed);
                     } else {
                         ErrorResponse errorResponse =
-                                new Gson().fromJson(response.getData(), ErrorResponse.class);
+                                mGsonInjector.get().fromJson(response.getData(),
+                                        ErrorResponse.class);
                         switch (errorResponse.getCode()) {
                             case ErrorCode.USER_NOT_REGISTERED:
                                 mAppExecutors.mainThread().execute(callback::onTokenExpired);
@@ -150,13 +155,15 @@ public class AccountManagerImpl implements AccountManager {
                     BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
 
                     if (response.getCode() == Response.STATE_CREATED) {
-                        Account account = new Gson().fromJson(response.getData(), Account.class);
+                        Account account = mGsonInjector.get().fromJson(response.getData(),
+                                Account.class);
                         saveAccountSession(account);
                         mCachedAccount = account;
                         mAppExecutors.mainThread().execute(callback::onRegisterSucceed);
                     } else {
                         ErrorResponse errorResponse =
-                                new Gson().fromJson(response.getData(), ErrorResponse.class);
+                                mGsonInjector.get().fromJson(response.getData(),
+                                        ErrorResponse.class);
                         switch (errorResponse.getCode()) {
                             case ErrorCode.USERNAME_EXISTED:
                                 mAppExecutors.mainThread().execute(callback::onUsernameExisted);
@@ -191,7 +198,8 @@ public class AccountManagerImpl implements AccountManager {
 
                     if (response.getCode() == Response.STATE_OK) {
                         UserQueryResponse queryResponse =
-                                new Gson().fromJson(response.getData(), UserQueryResponse.class);
+                                mGsonInjector.get().fromJson(response.getData(),
+                                        UserQueryResponse.class);
                         if (queryResponse.getResults().size() > 0) {
                             mAppExecutors.mainThread().execute(callback::onUsernameRegistered);
                         } else {
@@ -216,7 +224,8 @@ public class AccountManagerImpl implements AccountManager {
 
                     if (response.getCode() == Response.STATE_OK) {
                         UserQueryResponse queryResponse =
-                                new Gson().fromJson(response.getData(), UserQueryResponse.class);
+                                mGsonInjector.get().fromJson(response.getData(),
+                                        UserQueryResponse.class);
                         if (queryResponse.getResults().size() > 0) {
                             mAppExecutors.mainThread().execute(callback::onEmailRegistered);
                         } else {

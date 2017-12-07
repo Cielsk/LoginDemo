@@ -2,7 +2,7 @@ package com.cielyang.android.login.data.local;
 
 import static com.cielyang.android.login.configs.SharedPreferencesConfig.TOKEN_KEY;
 
-import com.cielyang.android.login.common.utils.SharedPreferencesUtils;
+import com.cielyang.android.login.common.utils.SharedPrefsUtil;
 import com.cielyang.android.login.data.entities.Account;
 
 import javax.inject.Inject;
@@ -12,18 +12,18 @@ import javax.inject.Singleton;
 @Singleton
 public class SessionDao {
 
-    private SharedPreferencesUtils mSharedPreferencesUtils;
+    private SharedPrefsUtil mSharedPrefsUtil;
 
     @Inject
-    public SessionDao(SharedPreferencesUtils sharedPreferencesUtils) {
-        mSharedPreferencesUtils = sharedPreferencesUtils;
+    public SessionDao(SharedPrefsUtil sharedPrefsUtil) {
+        mSharedPrefsUtil = sharedPrefsUtil;
     }
 
     public void saveSession(Account account) {
-        mSharedPreferencesUtils.save(TOKEN_KEY, account.getSessionToken());
+        mSharedPrefsUtil.save(TOKEN_KEY, account.getSessionToken());
     }
 
     public String getSessionToken() {
-        return mSharedPreferencesUtils.get(TOKEN_KEY);
+        return mSharedPrefsUtil.get(TOKEN_KEY);
     }
 }
