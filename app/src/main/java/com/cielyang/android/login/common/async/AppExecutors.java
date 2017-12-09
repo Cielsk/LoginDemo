@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.cielyang.android.login.common.utils;
+package com.cielyang.android.login.common.async;
 
 import android.os.Handler;
 import android.os.Looper;

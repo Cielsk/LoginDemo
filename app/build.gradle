@@ -36,7 +36,7 @@ android {
     if (project.hasProperty('devBuild')) {
         aaptOptions.cruncherEnabled = false
     }
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.2'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -68,4 +68,6 @@ dependencies {
     implementation 'com.google.dagger:dagger-android-support:2.13'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.13'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 }

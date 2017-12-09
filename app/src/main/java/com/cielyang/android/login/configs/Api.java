@@ -5,19 +5,19 @@ import com.cielyang.android.login.BuildConfig;
 /** */
 public class Api {
 
-    public static final String QUERY_PARAM_NAME = "condition";
+    public static final String QUERY_PARAM_NAME = "where";
     // 注册
-    private static final String REGISTER = "/users";
+    public static final String REGISTER = "users";
     // 登录
-    private static final String LOGIN = "/login";
+    public static final String LOGIN = "login";
     // token 登录
-    private static final String LOGIN_BY_TOKEN = "/users/me";
+    public static final String LOGIN_BY_TOKEN = "users/me";
     // 查询户是否存在
     // 传入的条件是 JSON 字符串
-    private static final String QUERY_USER = "/users?where={condition}";
+    public static final String QUERY_USER = "users";
     // base sDomain
-    private static final String DEBUG_DOMAIN = "https://ikg5f8q7.api.lncld.net/1.1";
-    private static final String RElEASE_DOMAIN = "https://ikg5f8q7.api.lncld.net/1.1";
+    private static final String DEBUG_DOMAIN = "https://ikg5f8q7.api.lncld.net/1.1/";
+    private static final String RElEASE_DOMAIN = "https://ikg5f8q7.api.lncld.net/1.1/";
     // app id
     private static final String DEBUG_APP_ID = "IKG5f8Q72UVbht3p31i4GOH9-gzGzoHsz";
     private static final String RELEASE_APP_ID = "IKG5f8Q72UVbht3p31i4GOH9-gzGzoHsz";

@@ -1,33 +1,31 @@
 package com.cielyang.android.login.data;
 
-import static com.cielyang.android.login.configs.leancloud.RequestBody.LOGIN_EMAIL_PARAM_NAME;
-import static com.cielyang.android.login.configs.leancloud.RequestBody.PASSWORD_PARAM_NAME;
-import static com.cielyang.android.login.configs.leancloud.RequestBody.REGISTER_EMAIL_PARAM_NAME;
-import static com.cielyang.android.login.configs.leancloud.RequestBody.USERNAME_PARAM_NAME;
-
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.cielyang.android.login.common.http.HttpClient;
-import com.cielyang.android.login.common.http.Response;
-import com.cielyang.android.login.common.http.impl.BaseRequest;
-import com.cielyang.android.login.common.http.impl.BaseResponse;
-import com.cielyang.android.login.common.http.impl.OkHttpClientImpl;
-import com.cielyang.android.login.common.utils.AppExecutors;
-import com.cielyang.android.login.configs.Api;
+import com.cielyang.android.login.common.async.AppExecutors;
 import com.cielyang.android.login.configs.leancloud.ErrorCode;
 import com.cielyang.android.login.configs.leancloud.ErrorResponse;
-import com.cielyang.android.login.configs.leancloud.RequestHeader;
 import com.cielyang.android.login.data.entities.Account;
+import com.cielyang.android.login.data.entities.LoginInfo;
+import com.cielyang.android.login.data.entities.RegisterInfo;
 import com.cielyang.android.login.data.local.SessionDao;
-import com.cielyang.android.login.data.remote.CommonInterceptor;
+import com.cielyang.android.login.data.remote.AccountService;
 import com.cielyang.android.login.data.remote.UserQueryResponse;
 import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
+
+import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /** */
 @Singleton
@@ -35,20 +33,23 @@ public class AccountManagerImpl implements AccountManager {
 
     @Inject
     Lazy<Gson> mGsonInjector;
-    private HttpClient mHttpClient;
+
     private AppExecutors mAppExecutors;
+
     private SessionDao mSessionDao;
+
     private Account mCachedAccount;
+
+    private AccountService mService;
 
     @Inject
     public AccountManagerImpl(
-            @NonNull OkHttpClientImpl httpClient,
+            @NonNull AppExecutors appExecutors,
             @NonNull SessionDao sessionDao,
-            @NonNull AppExecutors appExecutors) {
-        httpClient.addNetworkInterceptor(new CommonInterceptor());
-        mHttpClient = httpClient;
-        mSessionDao = sessionDao;
+            @NonNull Retrofit retrofit) {
         mAppExecutors = appExecutors;
+        mSessionDao = sessionDao;
+        mService = retrofit.create(AccountService.class);
     }
 
     @Override
@@ -72,37 +73,41 @@ public class AccountManagerImpl implements AccountManager {
             @NonNull LoginByEmailCallback callback) {
         Runnable runnable =
                 () -> {
-                    BaseRequest request = new BaseRequest(Api.getLoginUrl());
-                    request.setBodyField(LOGIN_EMAIL_PARAM_NAME, email.toString());
-                    request.setBodyField(PASSWORD_PARAM_NAME, password.toString());
-
-                    BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
-
-                    if (response.getCode() == Response.STATE_OK) {
-                        Account account = mGsonInjector.get().fromJson(response.getData(),
-                                Account.class);
-                        saveAccountSession(account);
-                        mCachedAccount = account;
-                        mAppExecutors.mainThread().execute(callback::onLoginSucceed);
-                    } else {
-                        ErrorResponse errorResponse =
-                                mGsonInjector.get().fromJson(response.getData(),
-                                        ErrorResponse.class);
-                        switch (errorResponse.getCode()) {
-                            case ErrorCode.USER_NOT_REGISTERED:
-                                mAppExecutors.mainThread().execute(callback::onEmailNotExisted);
-                                break;
-                            case ErrorCode.INCORRECT_PASSWORD:
-                                mAppExecutors.mainThread().execute(callback::onPasswordIncorrect);
-                                break;
-                            default:
-                                mAppExecutors.mainThread().execute(callback::onLoginFailed);
-                                break;
+                    Call<Account> call =
+                            mService.loginByEmail(
+                                    new LoginInfo(email.toString(), password.toString()));
+                    try {
+                        Response<Account> response = call.execute();
+                        if (response.isSuccessful()) {
+                            mCachedAccount = response.body();
+                            saveAccountSession(mCachedAccount);
+                            mAppExecutors.mainThread().execute(callback::onLoginSucceed);
+                        } else {
+                            ErrorResponse errorResponse = getErrorResponse(response);
+                            parseLoginByEmailError(callback, errorResponse);
                         }
+                    } catch (IOException e) {
+                        Logger.e(e, "Http request for login by email failed.");
+                        mAppExecutors.mainThread().execute(callback::onLoginFailed);
                     }
                 };
 
         mAppExecutors.networkIO().execute(runnable);
+    }
+
+    private void parseLoginByEmailError(
+            @NonNull LoginByEmailCallback callback, ErrorResponse errorResponse) {
+        switch (errorResponse.getCode()) {
+            case ErrorCode.USER_NOT_REGISTERED:
+                mAppExecutors.mainThread().execute(callback::onEmailNotExisted);
+                break;
+            case ErrorCode.INCORRECT_PASSWORD:
+                mAppExecutors.mainThread().execute(callback::onPasswordIncorrect);
+                break;
+            default:
+                mAppExecutors.mainThread().execute(callback::onLoginFailed);
+                break;
+        }
     }
 
     @Override
@@ -110,33 +115,36 @@ public class AccountManagerImpl implements AccountManager {
         Runnable runnable =
                 () -> {
                     String token = mSessionDao.getSessionToken();
-                    BaseRequest request = new BaseRequest(Api.getLoginByTokenUrl());
-                    request.setHeaderField(RequestHeader.SESSION_TOKEN_PARAMETER_NAME, token);
-
-                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
-
-                    if (response.getCode() == Response.STATE_OK) {
-                        Account account = mGsonInjector.get().fromJson(response.getData(),
-                                Account.class);
-                        saveAccountSession(account);
-                        mCachedAccount = account;
-                        mAppExecutors.mainThread().execute(callback::onLoginSucceed);
-                    } else {
-                        ErrorResponse errorResponse =
-                                mGsonInjector.get().fromJson(response.getData(),
-                                        ErrorResponse.class);
-                        switch (errorResponse.getCode()) {
-                            case ErrorCode.USER_NOT_REGISTERED:
-                                mAppExecutors.mainThread().execute(callback::onTokenExpired);
-                                break;
-                            default:
-                                mAppExecutors.mainThread().execute(callback::onLoginFailed);
-                                break;
+                    Call<Account> call = mService.loginByToken(token);
+                    try {
+                        Response<Account> response = call.execute();
+                        if (response.isSuccessful()) {
+                            mCachedAccount = response.body();
+                            saveAccountSession(mCachedAccount);
+                            mAppExecutors.mainThread().execute(callback::onLoginSucceed);
+                        } else {
+                            ErrorResponse errorResponse = getErrorResponse(response);
+                            parseLoginByTokenError(callback, errorResponse);
                         }
+                    } catch (IOException e) {
+                        Logger.e(e, "Http request for login by token failed.");
+                        callback.onLoginFailed();
                     }
                 };
 
         mAppExecutors.networkIO().execute(runnable);
+    }
+
+    private void parseLoginByTokenError(
+            @NonNull LoginByTokenCallback callback, ErrorResponse errorResponse) {
+        switch (errorResponse.getCode()) {
+            case ErrorCode.USER_NOT_REGISTERED:
+                mAppExecutors.mainThread().execute(callback::onTokenExpired);
+                break;
+            default:
+                mAppExecutors.mainThread().execute(callback::onLoginFailed);
+                break;
+        }
     }
 
     @Override
@@ -147,38 +155,50 @@ public class AccountManagerImpl implements AccountManager {
             @NonNull RegisterCallback callback) {
         Runnable runnable =
                 () -> {
-                    BaseRequest request = new BaseRequest(Api.getRegisterUrl());
-                    request.setBodyField(USERNAME_PARAM_NAME, username.toString());
-                    request.setBodyField(REGISTER_EMAIL_PARAM_NAME, email.toString());
-                    request.setBodyField(PASSWORD_PARAM_NAME, password.toString());
-
-                    BaseResponse response = (BaseResponse) mHttpClient.post(request, false);
-
-                    if (response.getCode() == Response.STATE_CREATED) {
-                        Account account = mGsonInjector.get().fromJson(response.getData(),
-                                Account.class);
-                        saveAccountSession(account);
-                        mCachedAccount = account;
-                        mAppExecutors.mainThread().execute(callback::onRegisterSucceed);
-                    } else {
-                        ErrorResponse errorResponse =
-                                mGsonInjector.get().fromJson(response.getData(),
-                                        ErrorResponse.class);
-                        switch (errorResponse.getCode()) {
-                            case ErrorCode.USERNAME_EXISTED:
-                                mAppExecutors.mainThread().execute(callback::onUsernameExisted);
-                                break;
-                            case ErrorCode.EMAIL_EXISTED:
-                                mAppExecutors.mainThread().execute(callback::onEmailExisted);
-                                break;
-                            default:
-                                mAppExecutors.mainThread().execute(callback::onRegisterFailed);
-                                break;
+                    Call<Account> call =
+                            mService.register(
+                                    new RegisterInfo(
+                                            username.toString(),
+                                            email.toString(),
+                                            password.toString()));
+                    try {
+                        Response<Account> response = call.execute();
+                        if (response.isSuccessful()) {
+                            mCachedAccount = response.body();
+                            saveAccountSession(mCachedAccount);
+                            mAppExecutors.mainThread().execute(callback::onRegisterSucceed);
+                        } else {
+                            ErrorResponse errorResponse = getErrorResponse(response);
+                            parseRegisterError(callback, errorResponse);
                         }
+                    } catch (IOException e) {
+                        Logger.e(e, "Http request for register failed.");
+                        callback.onRegisterFailed();
                     }
                 };
 
         mAppExecutors.networkIO().execute(runnable);
+    }
+
+    private void parseRegisterError(
+            @NonNull RegisterCallback callback, ErrorResponse errorResponse) {
+        switch (errorResponse.getCode()) {
+            case ErrorCode.USERNAME_EXISTED:
+                mAppExecutors.mainThread().execute(callback::onUsernameExisted);
+                break;
+            case ErrorCode.EMAIL_EXISTED:
+                mAppExecutors.mainThread().execute(callback::onEmailExisted);
+                break;
+            default:
+                mAppExecutors.mainThread().execute(callback::onRegisterFailed);
+                break;
+        }
+    }
+
+    private ErrorResponse getErrorResponse(Response<Account> response) throws IOException {
+        ResponseBody body = response.errorBody();
+        String json = body == null ? "" : body.string();
+        return mGsonInjector.get().fromJson(json, ErrorResponse.class);
     }
 
     private void saveAccountSession(Account account) {
@@ -190,21 +210,24 @@ public class AccountManagerImpl implements AccountManager {
             @NonNull CharSequence username, @NonNull QueryUsernameCallback callback) {
         Runnable runnable =
                 () -> {
-                    BaseRequest request = new BaseRequest(Api.getQueryUserUrl());
-                    String condition = String.format("{\"%s\":\"%s\"}", "username", username);
-                    request.setBodyField(Api.QUERY_PARAM_NAME, condition);
-
-                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
-
-                    if (response.getCode() == Response.STATE_OK) {
-                        UserQueryResponse queryResponse =
-                                mGsonInjector.get().fromJson(response.getData(),
-                                        UserQueryResponse.class);
-                        if (queryResponse.getResults().size() > 0) {
-                            mAppExecutors.mainThread().execute(callback::onUsernameRegistered);
-                        } else {
-                            mAppExecutors.mainThread().execute(callback::onUsernameNotRegistered);
+                    String info = String.format("{\"%s\":\"%s\"}", "username", username);
+                    Call<UserQueryResponse> call = mService.findUsers(info);
+                    try {
+                        Response<UserQueryResponse> response = call.execute();
+                        if (response.isSuccessful()) {
+                            UserQueryResponse queryResponse = response.body();
+                            List<Account> list =
+                                    queryResponse != null ? queryResponse.getResults() : null;
+                            if (list != null && !list.isEmpty()) {
+                                mAppExecutors.mainThread().execute(callback::onUsernameRegistered);
+                            } else {
+                                mAppExecutors
+                                        .mainThread()
+                                        .execute(callback::onUsernameNotRegistered);
+                            }
                         }
+                    } catch (IOException e) {
+                        Logger.e(e, "Http request for finding user by name failed.");
                     }
                 };
 
@@ -216,21 +239,22 @@ public class AccountManagerImpl implements AccountManager {
             @NonNull CharSequence email, @NonNull QueryEmailCallback callback) {
         Runnable runnable =
                 () -> {
-                    BaseRequest request = new BaseRequest(Api.getQueryUserUrl());
-                    String condition = String.format("{\"%s\":\"%s\"}", "email", email);
-                    request.setBodyField(Api.QUERY_PARAM_NAME, condition);
-
-                    BaseResponse response = (BaseResponse) mHttpClient.get(request, false);
-
-                    if (response.getCode() == Response.STATE_OK) {
-                        UserQueryResponse queryResponse =
-                                mGsonInjector.get().fromJson(response.getData(),
-                                        UserQueryResponse.class);
-                        if (queryResponse.getResults().size() > 0) {
-                            mAppExecutors.mainThread().execute(callback::onEmailRegistered);
-                        } else {
-                            mAppExecutors.mainThread().execute(callback::onEmailNotRegistered);
+                    String info = String.format("{\"%s\":\"%s\"}", "email", email);
+                    Call<UserQueryResponse> call = mService.findUsers(info);
+                    try {
+                        Response<UserQueryResponse> response = call.execute();
+                        if (response.isSuccessful()) {
+                            UserQueryResponse queryResponse = response.body();
+                            List<Account> list =
+                                    queryResponse != null ? queryResponse.getResults() : null;
+                            if (list != null && !list.isEmpty()) {
+                                mAppExecutors.mainThread().execute(callback::onEmailRegistered);
+                            } else {
+                                mAppExecutors.mainThread().execute(callback::onEmailNotRegistered);
+                            }
                         }
+                    } catch (IOException e) {
+                        Logger.e(e, "Http request for finding user by name failed.");
                     }
                 };
 
