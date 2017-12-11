@@ -1,4 +1,4 @@
-package com.cielyang.android.login.ui.activities;
+package com.cielyang.android.login.main;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +17,6 @@ import android.widget.TextView;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
-import com.cielyang.android.login.data.AccountManager;
-import com.cielyang.android.login.data.entities.Account;
 
 import javax.inject.Inject;
 
@@ -27,7 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, MainContract.View {
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -38,22 +36,32 @@ public class MainActivity extends BaseActivity
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
 
+    @Inject
+    MainContract.Presenter mPresenter;
+
     TextView mTextViewUsername;
 
     TextView mTextViewEmail;
-
-    @Inject
-    AccountManager mAccountManager;
-
     @BindView(R.id.text_view_main_content)
     TextView mTextViewMainContent;
     @BindString(R.string.greeting)
     String mGreeting;
-    private Account mAccount;
     private ActionBarDrawerToggle mToggle;
 
     public static void actionStart(@NonNull Context context) {
         context.startActivity(new Intent(context, MainActivity.class));
+    }
+
+    @Override
+    protected void onStop() {
+        mPresenter.unbindView();
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.bindView(this);
     }
 
     @Override
@@ -93,12 +101,6 @@ public class MainActivity extends BaseActivity
         View header = mNavView.getHeaderView(0);
         mTextViewUsername = header.findViewById(R.id.text_view_username);
         mTextViewEmail = header.findViewById(R.id.text_view_email);
-
-        mAccount = mAccountManager.getAccount();
-        mTextViewUsername.setText(mAccount.getUsername());
-        mTextViewEmail.setText(mAccount.getEmail());
-        mTextViewMainContent.setText(
-                String.format(mGreeting, mAccount.getUsername()));
     }
 
     @Override
@@ -110,11 +112,9 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
         switch (item.getItemId()) {
             case R.id.nav_camera:
                 mTextViewMainContent.setText(R.string.photo);
@@ -137,5 +137,16 @@ public class MainActivity extends BaseActivity
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void showUserName(CharSequence username) {
+        mTextViewUsername.setText(username);
+        mTextViewMainContent.setText(String.format(mGreeting, username));
+    }
+
+    @Override
+    public void showEmail(CharSequence email) {
+        mTextViewEmail.setText(email);
     }
 }
