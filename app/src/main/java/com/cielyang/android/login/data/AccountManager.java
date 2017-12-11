@@ -59,9 +59,9 @@ public interface AccountManager {
 
         void onRegisterSucceed();
 
-        void onUsernameExisted();
+        void onUsernameRegistered();
 
-        void onEmailExisted();
+        void onEmailRegistered();
 
         void onRegisterFailed();
     }

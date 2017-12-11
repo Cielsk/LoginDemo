@@ -1,14 +1,12 @@
-package com.cielyang.android.login.ui.fragments;
+package com.cielyang.android.login.login;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +16,8 @@ import android.widget.TextView;
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseFragment;
 import com.cielyang.android.login.common.utils.ToastUtils;
-import com.cielyang.android.login.common.utils.ValidateUtils;
-import com.cielyang.android.login.data.AccountManager;
-import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.di.ActivityScoped;
+import com.cielyang.android.login.main.MainActivity;
 
 import javax.inject.Inject;
 
@@ -30,17 +27,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-/**
- * A simple {@link Fragment} subclass. Activities that contain this fragment must implement the
- * {@link OnClickedListener} interface to handle interaction events. Use the {@link
- * LoginFragment#newInstance} factory method to create an instance of this fragment.
- */
-public class LoginFragment extends BaseFragment implements AccountManager.LoginByEmailCallback {
-
-    private static final String ARG_EMAIL = "param1";
+/** */
+@ActivityScoped
+public class LoginFragment extends BaseFragment implements LoginContract.View {
 
     @Inject
-    AccountManager mAccountManager;
+    LoginContract.Presenter mPresenter;
 
     @BindView(R.id.edit_text_email)
     TextInputEditText mEditTextEmail;
@@ -80,41 +72,25 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     Unbinder unbinder;
 
-    private CharSequence mEmail;
-    private CharSequence mPwd;
-
     private OnClickedListener mListener;
     private Context mActivity;
 
+    @Inject
     public LoginFragment() {
         // Required empty public constructor
     }
 
-    public static LoginFragment newInstance() {
-        return new LoginFragment();
-    }
-
-    /**
-     * Use this factory method to create a new instance of this fragment using the provided
-     * parameters.
-     *
-     * @param email email address.
-     * @return A new instance of fragment LoginFragment.
-     */
-    public static LoginFragment newInstance(CharSequence email) {
-        LoginFragment fragment = new LoginFragment();
-        Bundle args = new Bundle();
-        args.putCharSequence(ARG_EMAIL, email);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public void onPause() {
+        mPresenter.unbindView();
+        super.onPause();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mEmail = getArguments().getCharSequence(ARG_EMAIL);
-        }
+    public void onResume() {
+        super.onResume();
+        mPresenter.bindView(this);
+        init();
     }
 
     @Override
@@ -123,7 +99,6 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        init();
         return view;
     }
 
@@ -139,17 +114,12 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
                     @Override
                     public void onTextChanged(
                             CharSequence charSequence, int start, int before, int count) {
-                        clearErrorEmail();
+                        clearEmailError();
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearErrorEmail();
-                        if (TextUtils.isEmpty(editable)) {
-                            errorEmptyEmail();
-                        } else if (!ValidateUtils.isValidEmail(editable)) {
-                            errorInvalidEmail();
-                        }
+                        mPresenter.checkEmail(editable);
                     }
                 });
 
@@ -163,32 +133,34 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        clearErrorPwd();
-                        mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(true);
+                        clearPasswordError();
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearErrorPwd();
-                        mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(true);
-                        if (TextUtils.isEmpty(editable)) {
-                            mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(false);
-                            errorEmptyPassword();
-                        }
+                        clearPasswordError();
+                        mPresenter.checkPassword(editable);
                     }
                 });
     }
 
-    private void errorInvalidEmail() {
+    @Override
+    public void errorInvalidEmail() {
         mTextInputLayoutEmail.setError(mErrorInvalidEmail);
     }
 
-    private void errorEmptyEmail() {
+    @Override
+    public void errorEmptyEmail() {
         mTextInputLayoutEmail.setError(mErrorFiledRequired);
     }
 
-    private void errorEmptyPassword() {
+    @Override
+    public void errorEmptyPassword() {
         mTextInputLayoutPwd.setError(mErrorFiledRequired);
+    }
+
+    @Override
+    public void errorIncorrectPassword() {
     }
 
     @Override
@@ -216,71 +188,57 @@ public class LoginFragment extends BaseFragment implements AccountManager.LoginB
 
     @OnClick(R.id.btn_login)
     public void onBtnLoginClicked() {
-        if (isValidInput()) {
-            mListener.showLoadingIndicator(true);
-            mBtnLogin.setEnabled(false);
-            mAccountManager.loginByEmail(mEmail, mPwd, this);
-        }
-    }
-
-    private boolean isValidInput() {
-        mEmail = mEditTextEmail.getText();
-        mPwd = mEditTextPwd.getText();
-
-        return ValidateUtils.isValidEmail(mEmail)
-                && !ValidateUtils.isShortPassword(mPwd)
-                && ValidateUtils.isValidPassword(mPwd);
+        mPresenter.loginByEmail(mEditTextEmail.getText(), mEditTextPwd.getText());
     }
 
     public void errorEmailNotExisted() {
-        clearErrorEmail();
+        clearEmailError();
         mTextInputLayoutEmail.setError(mErrorEmailNotRegistered);
     }
 
+    @Override
+    public void errorLoginFailed() {
+        ToastUtils.error(mActivity, mErrorLoginFailedUnknownCause);
+    }
+
     @OnClick(R.id.link_register)
-    public void onLinkRegisterClicked() {
+    public void onRegisterLinkClicked() {
         mListener.onRegisterLinkClicked();
     }
 
-    private void launchMainPage() {
+    @Override
+    public void launchMainPage() {
         MainActivity.actionStart(mActivity);
     }
 
-    private void clearErrorEmail() {
+    @Override
+    public void setLoginBtnEnabled(boolean enabled) {
+        mBtnLogin.setEnabled(enabled);
+    }
+
+    @Override
+    public void setPasswordToggleEnabled(boolean enabled) {
+        mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(enabled);
+    }
+
+    @Override
+    public void showLoadingIndicator(boolean enabled) {
+        mListener.showLoadingIndicator(enabled);
+    }
+
+    @Override
+    public void showMsgLoginSucceed() {
+        ToastUtils.success(mActivity, mMsgLoginSuccess);
+    }
+
+    @Override
+    public void clearEmailError() {
         mTextInputLayoutEmail.setError(null);
     }
 
-    private void clearErrorPwd() {
+    @Override
+    public void clearPasswordError() {
         mTextInputLayoutPwd.setError(null);
-    }
-
-    @Override
-    public void onLoginSucceed() {
-        mListener.showLoadingIndicator(false);
-        mBtnLogin.setEnabled(true);
-        ToastUtils.success(mActivity, mMsgLoginSuccess);
-        launchMainPage();
-    }
-
-    @Override
-    public void onEmailNotExisted() {
-        mListener.showLoadingIndicator(false);
-        mBtnLogin.setEnabled(true);
-        errorEmailNotExisted();
-    }
-
-    @Override
-    public void onPasswordIncorrect() {
-        mListener.showLoadingIndicator(false);
-        mBtnLogin.setEnabled(true);
-        mTextInputLayoutPwd.setError(mErrorIncorrectPwd);
-    }
-
-    @Override
-    public void onLoginFailed() {
-        mListener.showLoadingIndicator(false);
-        mBtnLogin.setEnabled(true);
-        ToastUtils.error(mActivity, mErrorLoginFailedUnknownCause);
     }
 
     public interface OnClickedListener {

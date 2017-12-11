@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.cielyang.android.login.ui.fragments.LoginFragment">
+    tools:context="com.cielyang.android.login.login.LoginFragment">
 
     <TextView
         android:layout_width="match_parent"
@@ -24,6 +24,7 @@
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/section_vertical_spacing"
+        app:errorEnabled="true"
         app:errorTextAppearance="@style/TextAppearance.Design.Error"
         app:hintTextAppearance="@style/TextAppearance.Design.Hint">
 
@@ -45,6 +46,7 @@
         android:layout_marginBottom="@dimen/section_vertical_spacing"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
+        app:errorEnabled="true"
         app:errorTextAppearance="@style/TextAppearance.Design.Error"
         app:hintTextAppearance="@style/TextAppearance.Design.Hint"
         app:passwordToggleEnabled="false"

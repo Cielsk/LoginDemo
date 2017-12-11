@@ -19,7 +19,6 @@ import dagger.android.support.AndroidSupportInjectionModule;
                 AppModule.class,
                 DataModule.class,
                 ActivityBindingModule.class,
-                FragmentBindingModule.class,
                 AndroidSupportInjectionModule.class
         }
 )

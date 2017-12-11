@@ -1,14 +1,12 @@
-package com.cielyang.android.login.ui.fragments;
+package com.cielyang.android.login.register;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +17,8 @@ import android.widget.TextView;
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseFragment;
 import com.cielyang.android.login.common.utils.ToastUtils;
-import com.cielyang.android.login.common.utils.ValidateUtils;
-import com.cielyang.android.login.data.AccountManager;
-import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.di.ActivityScoped;
+import com.cielyang.android.login.main.MainActivity;
 
 import javax.inject.Inject;
 
@@ -31,15 +28,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-/**
- * A simple {@link Fragment} subclass. Activities that contain this fragment must implement the
- * {@link OnClickedListener} interface to handle interaction events. Use the {@link
- * RegisterFragment#newInstance} factory method to create an instance of this fragment.
- */
-public class RegisterFragment extends BaseFragment
-        implements AccountManager.RegisterCallback,
-        AccountManager.QueryEmailCallback,
-        AccountManager.QueryUsernameCallback {
+/** */
+@ActivityScoped
+public class RegisterFragment extends BaseFragment implements RegisterContract.View {
 
     @BindView(R.id.edit_text_username)
     TextInputEditText mEditTextUsername;
@@ -95,21 +86,27 @@ public class RegisterFragment extends BaseFragment
     Unbinder unbinder;
 
     @Inject
-    AccountManager mAccountManager;
+    RegisterContract.Presenter mPresenter;
 
     private OnClickedListener mListener;
     private Context mActivity;
 
-    private CharSequence mUsername;
-    private CharSequence mEmail;
-    private CharSequence mPwd;
-
+    @Inject
     public RegisterFragment() {
         // Required empty public constructor
     }
 
-    public static RegisterFragment newInstance() {
-        return new RegisterFragment();
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.bindView(this);
+        init();
+    }
+
+    @Override
+    public void onStop() {
+        mPresenter.unbindView();
+        super.onStop();
     }
 
     @Override
@@ -119,7 +116,6 @@ public class RegisterFragment extends BaseFragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        init();
         return view;
     }
 
@@ -140,19 +136,14 @@ public class RegisterFragment extends BaseFragment
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearUsernameError();
-                        if (TextUtils.isEmpty(editable)) {
-                            errorEmptyUsername();
-                        } else if (!ValidateUtils.isValidUsername(editable)) {
-                            errorInvalidUsername();
-                        }
+                        mPresenter.checkUsername(editable);
                     }
                 });
         mEditTextUsername.setOnFocusChangeListener(
                 (view, hasFocus) -> {
                     if (!hasFocus && view != null) {
                         CharSequence username = ((EditText) view).getText();
-                        checkUsernameRegisteredOrNot(username);
+                        mPresenter.checkUsernameRegisteredOrNot(username);
                     }
                 });
 
@@ -172,19 +163,14 @@ public class RegisterFragment extends BaseFragment
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearEmailError();
-                        if (TextUtils.isEmpty(editable)) {
-                            errorEmptyEmail();
-                        } else if (!ValidateUtils.isValidEmail(editable)) {
-                            errorInvalidEmail();
-                        }
+                        mPresenter.checkEmail(editable);
                     }
                 });
         mEditTextEmail.setOnFocusChangeListener(
                 (view, hasFocus) -> {
                     if (!hasFocus && view != null) {
                         CharSequence email = ((EditText) view).getText();
-                        checkEmailRegisteredOrNot(email);
+                        mPresenter.checkEmailRegisteredOrNot(email);
                     }
                 });
 
@@ -204,26 +190,9 @@ public class RegisterFragment extends BaseFragment
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearPasswordError();
-                        mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(true);
-                        if (TextUtils.isEmpty(editable)) {
-                            mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
-                            errorEmptyPassword();
-                        } else if (ValidateUtils.isShortPassword(editable)) {
-                            errorShortPassword();
-                        } else if (!ValidateUtils.isValidPassword(editable)) {
-                            errorInvalidPassword();
-                        }
+                        mPresenter.checkPassword(editable);
                     }
                 });
-    }
-
-    private void checkEmailRegisteredOrNot(CharSequence email) {
-        mAccountManager.queryUserByEmail(email, this);
-    }
-
-    private void checkUsernameRegisteredOrNot(CharSequence username) {
-        mAccountManager.queryUserByName(username, this);
     }
 
     @Override
@@ -251,22 +220,8 @@ public class RegisterFragment extends BaseFragment
 
     @OnClick(R.id.btn_register)
     public void onBtnRegisterClicked() {
-        if (isValidInput()) {
-            mListener.showLoadingIndicator(true);
-            mBtnRegister.setEnabled(false);
-            mAccountManager.register(mUsername, mEmail, mPwd, this);
-        }
-    }
-
-    private boolean isValidInput() {
-        mUsername = mEditTextUsername.getText();
-        mEmail = mEditTextEmail.getText();
-        mPwd = mEditTextPassword.getText();
-
-        return ValidateUtils.isValidUsername(mUsername)
-                && ValidateUtils.isValidEmail(mEmail)
-                && !ValidateUtils.isShortPassword(mPwd)
-                && ValidateUtils.isValidPassword(mPwd);
+        mPresenter.register(
+                mEditTextUsername.getText(), mEditTextEmail.getText(), mEditTextPassword.getText());
     }
 
     @OnClick(R.id.link_login)
@@ -274,103 +229,100 @@ public class RegisterFragment extends BaseFragment
         mListener.onLoginLinkClicked();
     }
 
-    private void clearUsernameError() {
+    @Override
+    public void clearUsernameError() {
         mTextInputLayoutUsername.setError(null);
     }
 
-    private void clearPasswordError() {
+    @Override
+    public void clearPasswordError() {
         mTextInputLayoutPassword.setError(null);
     }
 
-    private void clearEmailError() {
+    @Override
+    public void clearEmailError() {
         mTextInputLayoutEmail.setError(null);
     }
 
-    private void errorEmptyUsername() {
+    @Override
+    public void errorEmptyUsername() {
         mTextInputLayoutUsername.setError(mErrorFieldRequired);
     }
 
-    private void errorInvalidUsername() {
-        mTextInputLayoutUsername.setError(mErrorInvalidUsername);
-    }
-
-    private void errorEmptyEmail() {
-        mTextInputLayoutEmail.setError(mErrorFieldRequired);
-    }
-
-    private void errorInvalidEmail() {
-        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
-    }
-
-    private void errorEmptyPassword() {
-        mTextInputLayoutPassword.setError(mErrorFieldRequired);
-    }
-
-    private void errorShortPassword() {
-        mTextInputLayoutPassword.setError(mErrorShortPwd);
-    }
-
-    private void errorInvalidPassword() {
-        mTextInputLayoutPassword.setError(mErrorInvalidPwd);
-    }
-
-    private void launchMainPage() {
-        MainActivity.actionStart(mActivity);
-    }
-
     @Override
-    public void onRegisterSucceed() {
-        mListener.showLoadingIndicator(false);
-        mBtnRegister.setEnabled(true);
-        ToastUtils.success(mActivity, mMsgRegisterSuccess);
-        launchMainPage();
-    }
-
-    @Override
-    public void onUsernameExisted() {
-        mListener.showLoadingIndicator(false);
-        mBtnRegister.setEnabled(true);
+    public void errorUsernameRegistered() {
         mTextInputLayoutUsername.setError(mErrorUsernameExisted);
     }
 
     @Override
-    public void onEmailExisted() {
-        mListener.showLoadingIndicator(false);
-        mBtnRegister.setEnabled(true);
+    public void errorInvalidUsername() {
+        mTextInputLayoutUsername.setError(mErrorInvalidUsername);
+    }
+
+    @Override
+    public void errorEmptyEmail() {
+        mTextInputLayoutEmail.setError(mErrorFieldRequired);
+    }
+
+    @Override
+    public void errorEmailRegistered() {
         mTextInputLayoutEmail.setError(mErrorEmailExisted);
     }
 
     @Override
-    public void onRegisterFailed() {
-        mListener.showLoadingIndicator(false);
-        mBtnRegister.setEnabled(true);
+    public void errorInvalidEmail() {
+        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
+    }
+
+    @Override
+    public void errorEmptyPassword() {
+        mTextInputLayoutPassword.setError(mErrorFieldRequired);
+    }
+
+    @Override
+    public void errorShortPassword() {
+        mTextInputLayoutPassword.setError(mErrorShortPwd);
+    }
+
+    @Override
+    public void errorRegisterFailed() {
         ToastUtils.error(mActivity, mErrorRegisterFailedUnknownCause);
     }
 
     @Override
-    public void onUsernameRegistered() {
-        mTextInputLayoutUsername.setError(mErrorUsernameExisted);
+    public void errorInvalidPassword() {
+        mTextInputLayoutPassword.setError(mErrorInvalidPwd);
     }
 
     @Override
-    public void onUsernameNotRegistered() {
-        // do nothing
+    public void launchMainPage() {
+        MainActivity.actionStart(mActivity);
     }
 
     @Override
-    public void onEmailRegistered() {
-        mTextInputLayoutEmail.setError(mErrorEmailExisted);
+    public void setRegisterBtnEnabled(boolean enabled) {
+        mBtnRegister.setEnabled(enabled);
     }
 
     @Override
-    public void onEmailNotRegistered() {
-        // do nothing
+    public void setPasswordToggleEnabled(boolean enabled) {
+        mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(enabled);
+    }
+
+    @Override
+    public void showLoadingIndicator(boolean enabled) {
+        mListener.showLoadingIndicator(enabled);
+    }
+
+    @Override
+    public void showMsgRegisterSucceed() {
+        ToastUtils.success(mActivity, mMsgRegisterSuccess);
     }
 
     public interface OnClickedListener {
 
         void onLoginLinkClicked();
 
-        void showLoadingIndicator(boolean shown);
+        void showLoadingIndicator(boolean enabled);
     }
 }

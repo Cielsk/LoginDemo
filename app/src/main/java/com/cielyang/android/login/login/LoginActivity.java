@@ -1,4 +1,4 @@
-package com.cielyang.android.login.ui.activities;
+package com.cielyang.android.login.login;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +14,9 @@ import android.widget.ProgressBar;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
-import com.cielyang.android.login.ui.fragments.LoginFragment;
-import com.cielyang.android.login.ui.fragments.RegisterFragment;
+import com.cielyang.android.login.register.RegisterFragment;
+
+import javax.inject.Inject;
 
 /**
  * 登录和注册页面.
@@ -25,10 +26,11 @@ import com.cielyang.android.login.ui.fragments.RegisterFragment;
 public class LoginActivity extends BaseActivity
         implements LoginFragment.OnClickedListener, RegisterFragment.OnClickedListener {
 
+    @Inject
+    LoginFragment mLoginFragment;
+    @Inject
+    RegisterFragment mRegisterFragment;
     private FragmentManager mFragmentManager;
-
-    private Fragment mFragment;
-
     private boolean mIsLoadingIndicatorShowing;
 
     private ProgressBar mProgressBar;
@@ -48,9 +50,8 @@ public class LoginActivity extends BaseActivity
     private void init() {
         mFragmentManager = getSupportFragmentManager();
         if (mFragmentManager.findFragmentById(R.id.fragment_container) == null) {
-            mFragment = LoginFragment.newInstance();
             FragmentTransaction transaction = mFragmentManager.beginTransaction();
-            transaction.add(R.id.fragment_container, mFragment);
+            transaction.add(R.id.fragment_container, mLoginFragment);
             transaction.commit();
         }
         mIsLoadingIndicatorShowing = false;
@@ -58,12 +59,12 @@ public class LoginActivity extends BaseActivity
 
     @Override
     public void onLoginLinkClicked() {
-        replaceFragmentWith(LoginFragment.newInstance());
+        replaceFragmentWith(mLoginFragment);
     }
 
     @Override
     public void onRegisterLinkClicked() {
-        replaceFragmentWith(RegisterFragment.newInstance());
+        replaceFragmentWith(mRegisterFragment);
     }
 
     @Override
@@ -84,7 +85,6 @@ public class LoginActivity extends BaseActivity
     }
 
     private void replaceFragmentWith(Fragment fragment) {
-        mFragment = fragment;
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();

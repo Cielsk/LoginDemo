@@ -184,10 +184,10 @@ public class AccountManagerImpl implements AccountManager {
             @NonNull RegisterCallback callback, ErrorResponse errorResponse) {
         switch (errorResponse.getCode()) {
             case ErrorCode.USERNAME_EXISTED:
-                mAppExecutors.mainThread().execute(callback::onUsernameExisted);
+                mAppExecutors.mainThread().execute(callback::onUsernameRegistered);
                 break;
             case ErrorCode.EMAIL_EXISTED:
-                mAppExecutors.mainThread().execute(callback::onEmailExisted);
+                mAppExecutors.mainThread().execute(callback::onEmailRegistered);
                 break;
             default:
                 mAppExecutors.mainThread().execute(callback::onRegisterFailed);
