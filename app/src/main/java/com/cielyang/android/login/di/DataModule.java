@@ -10,6 +10,7 @@ import com.cielyang.android.login.configs.SharedPreferencesConfig;
 import com.cielyang.android.login.data.AccountManager;
 import com.cielyang.android.login.data.AccountManagerImpl;
 import com.cielyang.android.login.data.remote.CommonInterceptor;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -47,7 +48,11 @@ public abstract class DataModule {
         File file = context.getCacheDir();
         Cache cache = new Cache(file, SharedPreferencesConfig.CACHE_SIZE);
         Interceptor interceptor = new CommonInterceptor();
-        return new OkHttpClient.Builder().addNetworkInterceptor(interceptor).cache(cache).build();
+        return new OkHttpClient.Builder()
+                .addNetworkInterceptor(interceptor)
+                .addNetworkInterceptor(new StethoInterceptor())
+                .cache(cache)
+                .build();
     }
 
     @Provides
