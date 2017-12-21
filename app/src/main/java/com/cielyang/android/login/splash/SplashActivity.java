@@ -44,6 +44,7 @@ public class SplashActivity extends BaseActivity implements SplashContract.View 
     protected void onResume() {
         super.onResume();
         mPresenter.bindView(this);
+        mPresenter.checkSessionToken();
     }
 
     @Override

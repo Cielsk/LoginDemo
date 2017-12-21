@@ -28,7 +28,6 @@ public class SplashPresenter
     @Override
     public void bindView(SplashContract.View view) {
         mView = view;
-        checkSessionToken();
     }
 
     @Override

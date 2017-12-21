@@ -2,8 +2,7 @@ package com.cielyang.android.login.register;
 
 import static com.cielyang.android.login.common.utils.PreconditionUtils.checkNotNull;
 
-import android.text.TextUtils;
-
+import com.cielyang.android.login.common.utils.TextUtils;
 import com.cielyang.android.login.common.utils.ValidateUtils;
 import com.cielyang.android.login.data.AccountManager;
 import com.cielyang.android.login.di.ActivityScoped;

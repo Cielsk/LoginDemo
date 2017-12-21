@@ -54,6 +54,7 @@ public class AccountManagerImpl implements AccountManager {
 
     @Override
     public void checkSessionToken(CheckSessionTokenCallback callback) {
+        System.out.println("model");
         Runnable runnable =
                 () -> {
                     if (TextUtils.isEmpty(mSessionDao.getSessionToken())) {

@@ -1,17 +1,25 @@
 package com.cielyang.android.login.common.utils;
 
-import android.os.Build;
-import android.text.TextUtils;
-import android.util.Patterns;
+import java.util.regex.Pattern;
 
 /** 本项目专用工具类，用以验证用户输入内容. */
 public class ValidateUtils {
+
+    public static final Pattern EMAIL_ADDRESS =
+            Pattern.compile(
+                    "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}"
+                            + "\\@"
+                            + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}"
+                            + "("
+                            + "\\."
+                            + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}"
+                            + ")+");
 
     private ValidateUtils() {
     }
 
     public static boolean isValidEmail(CharSequence target) {
-        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches();
+        return !TextUtils.isEmpty(target) && EMAIL_ADDRESS.matcher(target).matches();
     }
 
     public static boolean isShortPassword(CharSequence str) {
@@ -20,14 +28,9 @@ public class ValidateUtils {
 
     public static boolean isValidPassword(CharSequence password) {
         // 不能包含空格
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Java 8 的 stream API，更高效
-            return password.codePoints().noneMatch(Character::isWhitespace);
-        } else {
-            for (int i = 0; i < password.length(); i++) {
-                if (Character.isWhitespace(password.charAt(i))) {
-                    return false;
-                }
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isWhitespace(password.charAt(i))) {
+                return false;
             }
         }
         // 不能只使用数字
@@ -36,13 +39,9 @@ public class ValidateUtils {
 
     public static boolean isValidUsername(CharSequence username) {
         // 英文字母或数字
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return username.codePoints().allMatch(Character::isLetterOrDigit);
-        } else {
-            for (int i = 0; i < username.length(); i++) {
-                if (!Character.isLetterOrDigit(username.charAt(i))) {
-                    return false;
-                }
+        for (int i = 0; i < username.length(); i++) {
+            if (!Character.isLetterOrDigit(username.charAt(i))) {
+                return false;
             }
         }
 
