@@ -143,7 +143,9 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                 (view, hasFocus) -> {
                     if (!hasFocus && view != null) {
                         CharSequence username = ((EditText) view).getText();
-                        mPresenter.checkUsernameRegisteredOrNot(username);
+                        if (username.length() > 0) {
+                            mPresenter.checkUsernameRegisteredOrNot(username);
+                        }
                     }
                 });
 
@@ -170,7 +172,9 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                 (view, hasFocus) -> {
                     if (!hasFocus && view != null) {
                         CharSequence email = ((EditText) view).getText();
-                        mPresenter.checkEmailRegisteredOrNot(email);
+                        if (email.length() > 0) {
+                            mPresenter.checkEmailRegisteredOrNot(email);
+                        }
                     }
                 });
 
