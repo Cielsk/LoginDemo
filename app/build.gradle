@@ -73,6 +73,7 @@ dependencies {
 
     // android ui test
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:3.0.1'
 
     // Butter Knife
     implementation 'com.jakewharton:butterknife:8.8.1'
