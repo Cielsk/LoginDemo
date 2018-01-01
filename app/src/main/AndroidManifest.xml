@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".main.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:label="@string/main_page_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

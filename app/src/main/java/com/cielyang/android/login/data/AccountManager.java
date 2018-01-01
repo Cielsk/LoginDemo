@@ -1,5 +1,6 @@
 package com.cielyang.android.login.data;
 
+import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
 import com.cielyang.android.login.data.entities.Account;
@@ -26,7 +27,7 @@ public interface AccountManager {
 
     void queryUserByEmail(@NonNull CharSequence email, @NonNull QueryEmailCallback callback);
 
-    Account getAccount();
+    LiveData<Account> getAccount();
 
     interface CheckSessionTokenCallback {
 

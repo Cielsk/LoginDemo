@@ -1,5 +1,7 @@
 package com.cielyang.android.login.data;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -263,7 +265,9 @@ public class AccountManagerImpl implements AccountManager {
     }
 
     @Override
-    public Account getAccount() {
-        return mCachedAccount;
+    public LiveData<Account> getAccount() {
+        final MutableLiveData<Account> data = new MutableLiveData<>();
+        data.setValue(mCachedAccount);
+        return data;
     }
 }

@@ -6,7 +6,7 @@ import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
 import com.cielyang.android.login.common.utils.ToastUtils;
 import com.cielyang.android.login.login.LoginActivity;
-import com.cielyang.android.login.main.MainActivity;
+import com.cielyang.android.login.ui.activities.MainActivity;
 
 import javax.inject.Inject;
 

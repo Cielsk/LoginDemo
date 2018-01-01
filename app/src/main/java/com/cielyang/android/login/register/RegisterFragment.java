@@ -18,7 +18,7 @@ import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseFragment;
 import com.cielyang.android.login.common.utils.ToastUtils;
 import com.cielyang.android.login.di.ActivityScoped;
-import com.cielyang.android.login.main.MainActivity;
+import com.cielyang.android.login.ui.activities.MainActivity;
 
 import javax.inject.Inject;
 
