@@ -24,6 +24,7 @@ public class AppViewModelFactory implements ViewModelProvider.Factory {
         creators = new ArrayMap<>();
 
         creators.put(MainViewModel.class, viewModelComponent::mainViewModel);
+        creators.put(SplashViewModel.class, viewModelComponent::splashViewModel);
     }
 
     @NonNull

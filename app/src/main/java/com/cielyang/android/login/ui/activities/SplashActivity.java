@@ -1,12 +1,14 @@
-package com.cielyang.android.login.splash;
+package com.cielyang.android.login.ui.activities;
 
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
 import com.cielyang.android.login.common.utils.ToastUtils;
 import com.cielyang.android.login.login.LoginActivity;
-import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.viewmodel.SplashViewModel;
 
 import javax.inject.Inject;
 
@@ -29,10 +31,7 @@ import butterknife.ButterKnife;
  *   <li>如果无 session 保存，则跳转到登录页面
  * </ul>
  */
-public class SplashActivity extends BaseActivity implements SplashContract.View {
-
-    @Inject
-    SplashContract.Presenter mPresenter;
+public class SplashActivity extends BaseActivity {
 
     @BindString(R.string.msg_token_expired)
     String mMsgTokenExpired;
@@ -40,44 +39,48 @@ public class SplashActivity extends BaseActivity implements SplashContract.View 
     @BindString(R.string.error_login_failed_unknown_cause)
     String mErrorLoginFailed;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.bindView(this);
-        mPresenter.checkSessionToken();
-    }
+    @Inject
+    ViewModelProvider.Factory mViewModelFactory;
+
+    private SplashViewModel mSplashViewModel;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPresenter.unbindView();
     }
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ButterKnife.bind(this);
+        initViewModel();
+    }
+
+    private void initViewModel() {
+        mSplashViewModel =
+                ViewModelProviders.of(this, mViewModelFactory).get(SplashViewModel.class);
+
+        mSplashViewModel.getLaunchMainPageCommand().observe(this, __ -> launchMainPage());
+        mSplashViewModel.getLaunchLoginPageCommand().observe(this, __ -> launchLoginPage());
+
+        mSplashViewModel
+                .getTokenMessage()
+                .observe(this, (resId, toastLevel) -> ToastUtils.msg(this, resId, toastLevel));
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mSplashViewModel.start();
+    }
+
     public void launchMainPage() {
         MainActivity.actionStart(this);
         finish();
     }
 
-    @Override
     public void launchLoginPage() {
         LoginActivity.actionStart(this);
         finish();
-    }
-
-    @Override
-    public void errorTokenExpired() {
-        ToastUtils.error(SplashActivity.this, mMsgTokenExpired);
-    }
-
-    @Override
-    public void errorLoginFailed() {
-        ToastUtils.error(SplashActivity.this, mErrorLoginFailed);
     }
 }

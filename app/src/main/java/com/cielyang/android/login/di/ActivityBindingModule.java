@@ -3,9 +3,8 @@ package com.cielyang.android.login.di;
 import com.cielyang.android.login.login.LoginActivity;
 import com.cielyang.android.login.login.LoginModule;
 import com.cielyang.android.login.register.RegisterModule;
-import com.cielyang.android.login.splash.SplashActivity;
-import com.cielyang.android.login.splash.SplashModule;
 import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.ui.activities.SplashActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -15,7 +14,7 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class ActivityBindingModule {
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = SplashModule.class)
+    @ContributesAndroidInjector
     abstract SplashActivity bindSplashActivity();
 
     @ActivityScoped

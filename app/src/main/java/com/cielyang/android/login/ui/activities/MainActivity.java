@@ -32,16 +32,22 @@ public class MainActivity extends BaseActivity
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
+
     @BindView(R.id.nav_view)
     NavigationView mNavView;
+
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+
     @BindView(R.id.text_view_main_content)
     TextView mTextViewMainContent;
+
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
     private ActivityMainBinding mBinding;
     private ActionBarDrawerToggle mToggle;
+
+    private MainViewModel mMainViewModel;
 
     public static void actionStart(@NonNull Context context) {
         context.startActivity(new Intent(context, MainActivity.class));
@@ -57,12 +63,16 @@ public class MainActivity extends BaseActivity
         initViewModel();
     }
 
-    private void initViewModel() {
-        final MainViewModel mainViewModel =
-                ViewModelProviders.of(this, mViewModelFactory).get(MainViewModel.class);
-        mainViewModel.start();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMainViewModel.start();
+    }
 
-        mBinding.setViewModel(mainViewModel);
+    private void initViewModel() {
+        mMainViewModel = ViewModelProviders.of(this, mViewModelFactory).get(MainViewModel.class);
+
+        mBinding.setViewModel(mMainViewModel);
     }
 
     @Override
