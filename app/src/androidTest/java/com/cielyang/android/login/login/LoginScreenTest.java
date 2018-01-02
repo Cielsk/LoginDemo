@@ -19,6 +19,7 @@ import android.view.View;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.common.utils.TextUtils;
+import com.cielyang.android.login.ui.activities.LoginActivity;
 
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;

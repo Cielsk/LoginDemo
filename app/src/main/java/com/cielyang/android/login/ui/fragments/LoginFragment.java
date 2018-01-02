@@ -1,5 +1,7 @@
-package com.cielyang.android.login.login;
+package com.cielyang.android.login.ui.fragments;
 
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,10 +20,10 @@ import com.cielyang.android.login.base.BaseFragment;
 import com.cielyang.android.login.common.utils.ToastUtils;
 import com.cielyang.android.login.di.ActivityScoped;
 import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.viewmodel.LoginViewModel;
 
 import javax.inject.Inject;
 
-import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -29,10 +31,7 @@ import butterknife.Unbinder;
 
 /** */
 @ActivityScoped
-public class LoginFragment extends BaseFragment implements LoginContract.View {
-
-    @Inject
-    LoginContract.Presenter mPresenter;
+public class LoginFragment extends BaseFragment {
 
     @BindView(R.id.edit_text_email)
     TextInputEditText mEditTextEmail;
@@ -52,25 +51,12 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
     @BindView(R.id.link_register)
     TextView mLinkRegister;
 
-    @BindString(R.string.error_invalid_email)
-    String mErrorInvalidEmail;
-
-    @BindString(R.string.error_incorrect_password)
-    String mErrorIncorrectPwd;
-
-    @BindString(R.string.error_field_required)
-    String mErrorFiledRequired;
-
-    @BindString(R.string.error_email_not_registered)
-    String mErrorEmailNotRegistered;
-
-    @BindString(R.string.error_login_failed_unknown_cause)
-    String mErrorLoginFailedUnknownCause;
-
-    @BindString(R.string.msg_success_login)
-    String mMsgLoginSuccess;
-
     Unbinder unbinder;
+
+    @Inject
+    ViewModelProvider.Factory mViewModelFactory;
+
+    private LoginViewModel mLoginViewModel;
 
     private OnClickedListener mListener;
     private Context mActivity;
@@ -81,15 +67,8 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
     }
 
     @Override
-    public void onPause() {
-        mPresenter.unbindView();
-        super.onPause();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-        mPresenter.bindView(this);
         init();
     }
 
@@ -98,6 +77,7 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         unbinder = ButterKnife.bind(this, view);
+        initViewModel();
 
         return view;
     }
@@ -114,12 +94,11 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
                     @Override
                     public void onTextChanged(
                             CharSequence charSequence, int start, int before, int count) {
-                        clearEmailError();
+                        mTextInputLayoutEmail.setError(null);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        mPresenter.checkEmail(editable);
                     }
                 });
 
@@ -133,34 +112,49 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
 
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        clearPasswordError();
+                        mTextInputLayoutPwd.setError(null);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        clearPasswordError();
-                        mPresenter.checkPassword(editable);
                     }
                 });
     }
 
-    @Override
-    public void errorInvalidEmail() {
-        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
-    }
+    private void initViewModel() {
+        mLoginViewModel = ViewModelProviders.of(this, mViewModelFactory).get(LoginViewModel.class);
 
-    @Override
-    public void errorEmptyEmail() {
-        mTextInputLayoutEmail.setError(mErrorFiledRequired);
-    }
+        mLoginViewModel
+                .getLaunchMainPageCommand()
+                .observe(this, __ -> MainActivity.actionStart(mActivity));
 
-    @Override
-    public void errorEmptyPassword() {
-        mTextInputLayoutPwd.setError(mErrorFiledRequired);
-    }
-
-    @Override
-    public void errorIncorrectPassword() {
+        mLoginViewModel
+                .getTokenMessage()
+                .observe(this, (resId, toastLevel) -> ToastUtils.msg(mActivity, resId, toastLevel));
+        mLoginViewModel
+                .getLoginState()
+                .observe(
+                        this,
+                        isLogging -> {
+                            if (isLogging == null) return;
+                            mListener.showLoadingIndicator(isLogging);
+                            boolean enabled = !isLogging;
+                            mBtnLogin.setEnabled(enabled);
+                        });
+        mLoginViewModel
+                .getEmailErrorResId()
+                .observe(
+                        this,
+                        resId ->
+                                mTextInputLayoutEmail.setError(
+                                        resId == null ? null : getString(resId)));
+        mLoginViewModel
+                .getPasswordErrorResId()
+                .observe(
+                        this,
+                        resId ->
+                                mTextInputLayoutPwd.setError(
+                                        resId == null ? null : getString(resId)));
     }
 
     @Override
@@ -188,57 +182,12 @@ public class LoginFragment extends BaseFragment implements LoginContract.View {
 
     @OnClick(R.id.btn_login)
     public void onBtnLoginClicked() {
-        mPresenter.loginByEmail(mEditTextEmail.getText(), mEditTextPwd.getText());
-    }
-
-    public void errorEmailNotExisted() {
-        clearEmailError();
-        mTextInputLayoutEmail.setError(mErrorEmailNotRegistered);
-    }
-
-    @Override
-    public void errorLoginFailed() {
-        ToastUtils.error(mActivity, mErrorLoginFailedUnknownCause);
+        mLoginViewModel.loginByEmail(mEditTextEmail.getText(), mEditTextPwd.getText());
     }
 
     @OnClick(R.id.link_register)
     public void onRegisterLinkClicked() {
         mListener.onRegisterLinkClicked();
-    }
-
-    @Override
-    public void launchMainPage() {
-        MainActivity.actionStart(mActivity);
-    }
-
-    @Override
-    public void setLoginBtnEnabled(boolean enabled) {
-        mBtnLogin.setEnabled(enabled);
-    }
-
-    @Override
-    public void setPasswordToggleEnabled(boolean enabled) {
-        mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(enabled);
-    }
-
-    @Override
-    public void showLoadingIndicator(boolean enabled) {
-        mListener.showLoadingIndicator(enabled);
-    }
-
-    @Override
-    public void showMsgLoginSucceed() {
-        ToastUtils.success(mActivity, mMsgLoginSuccess);
-    }
-
-    @Override
-    public void clearEmailError() {
-        mTextInputLayoutEmail.setError(null);
-    }
-
-    @Override
-    public void clearPasswordError() {
-        mTextInputLayoutPwd.setError(null);
     }
 
     public interface OnClickedListener {

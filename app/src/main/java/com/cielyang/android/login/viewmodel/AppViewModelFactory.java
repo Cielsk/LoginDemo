@@ -25,6 +25,8 @@ public class AppViewModelFactory implements ViewModelProvider.Factory {
 
         creators.put(MainViewModel.class, viewModelComponent::mainViewModel);
         creators.put(SplashViewModel.class, viewModelComponent::splashViewModel);
+        creators.put(LoginViewModel.class, viewModelComponent::loginViewModel);
+        creators.put(RegisterViewModel.class, viewModelComponent::registerViewModel);
     }
 
     @NonNull

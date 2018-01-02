@@ -1,4 +1,4 @@
-package com.cielyang.android.login.login;
+package com.cielyang.android.login.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +14,8 @@ import android.widget.ProgressBar;
 
 import com.cielyang.android.login.R;
 import com.cielyang.android.login.base.BaseActivity;
-import com.cielyang.android.login.register.RegisterFragment;
+import com.cielyang.android.login.ui.fragments.LoginFragment;
+import com.cielyang.android.login.ui.fragments.RegisterFragment;
 
 import javax.inject.Inject;
 

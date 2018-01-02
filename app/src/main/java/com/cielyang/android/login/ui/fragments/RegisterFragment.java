@@ -1,5 +1,7 @@
-package com.cielyang.android.login.register;
+package com.cielyang.android.login.ui.fragments;
 
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,10 +21,10 @@ import com.cielyang.android.login.base.BaseFragment;
 import com.cielyang.android.login.common.utils.ToastUtils;
 import com.cielyang.android.login.di.ActivityScoped;
 import com.cielyang.android.login.ui.activities.MainActivity;
+import com.cielyang.android.login.viewmodel.RegisterViewModel;
 
 import javax.inject.Inject;
 
-import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -30,7 +32,7 @@ import butterknife.Unbinder;
 
 /** */
 @ActivityScoped
-public class RegisterFragment extends BaseFragment implements RegisterContract.View {
+public class RegisterFragment extends BaseFragment {
 
     @BindView(R.id.edit_text_username)
     TextInputEditText mEditTextUsername;
@@ -56,40 +58,12 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
     @BindView(R.id.link_login)
     TextView mLinkLogin;
 
-    @BindString(R.string.error_invalid_username)
-    String mErrorInvalidUsername;
-
-    @BindString(R.string.error_invalid_email)
-    String mErrorInvalidEmail;
-
-    @BindString(R.string.error_short_password)
-    String mErrorShortPwd;
-
-    @BindString(R.string.error_invalid_password)
-    String mErrorInvalidPwd;
-
-    @BindString(R.string.error_username_existed)
-    String mErrorUsernameExisted;
-
-    @BindString(R.string.error_email_existed)
-    String mErrorEmailExisted;
-
-    @BindString(R.string.error_register_failed_unknown_cause)
-    String mErrorRegisterFailedUnknownCause;
-
-    @BindString(R.string.error_field_required)
-    String mErrorFieldRequired;
-
-    @BindString(R.string.msg_success_register)
-    String mMsgRegisterSuccess;
-
     Unbinder unbinder;
-
     @Inject
-    RegisterContract.Presenter mPresenter;
-
+    ViewModelProvider.Factory mViewModelFactory;
     private OnClickedListener mListener;
     private Context mActivity;
+    private RegisterViewModel mRegisterViewModel;
 
     @Inject
     public RegisterFragment() {
@@ -99,14 +73,7 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
     @Override
     public void onResume() {
         super.onResume();
-        mPresenter.bindView(this);
         init();
-    }
-
-    @Override
-    public void onStop() {
-        mPresenter.unbindView();
-        super.onStop();
     }
 
     @Override
@@ -115,8 +82,54 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
         unbinder = ButterKnife.bind(this, view);
+        initViewModel();
 
         return view;
+    }
+
+    private void initViewModel() {
+        mRegisterViewModel =
+                ViewModelProviders.of(this, mViewModelFactory).get(RegisterViewModel.class);
+        mRegisterViewModel
+                .getLaunchMainPageCommand()
+                .observe(this, __ -> MainActivity.actionStart(mActivity));
+
+        mRegisterViewModel
+                .getTokenMessage()
+                .observe(this, (resId, toastLevel) -> ToastUtils.msg(mActivity, resId, toastLevel));
+
+        mRegisterViewModel
+                .getRegisterState()
+                .observe(
+                        this,
+                        isLogging -> {
+                            if (isLogging == null) return;
+                            mListener.showLoadingIndicator(isLogging);
+                            boolean enabled = !isLogging;
+                            mBtnRegister.setEnabled(enabled);
+                        });
+
+        mRegisterViewModel
+                .getUsernameErrorResId()
+                .observe(
+                        this,
+                        resId ->
+                                mTextInputLayoutUsername.setError(
+                                        resId == null ? null : getString(resId)));
+        mRegisterViewModel
+                .getEmailErrorResId()
+                .observe(
+                        this,
+                        resId ->
+                                mTextInputLayoutEmail.setError(
+                                        resId == null ? null : getString(resId)));
+        mRegisterViewModel
+                .getPasswordErrorResId()
+                .observe(
+                        this,
+                        resId ->
+                                mTextInputLayoutPassword.setError(
+                                        resId == null ? null : getString(resId)));
     }
 
     private void init() {
@@ -131,12 +144,11 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                     @Override
                     public void onTextChanged(
                             CharSequence charSequence, int start, int before, int count) {
-                        clearUsernameError();
+                        mTextInputLayoutUsername.setError(null);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        mPresenter.checkUsername(editable);
                     }
                 });
         mEditTextUsername.setOnFocusChangeListener(
@@ -144,7 +156,7 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                     if (!hasFocus && view != null) {
                         CharSequence username = ((EditText) view).getText();
                         if (username.length() > 0) {
-                            mPresenter.checkUsernameRegisteredOrNot(username);
+                            mRegisterViewModel.checkUsernameRegisteredOrNot(username);
                         }
                     }
                 });
@@ -160,12 +172,11 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                     @Override
                     public void onTextChanged(
                             CharSequence charSequence, int start, int before, int count) {
-                        clearEmailError();
+                        mTextInputLayoutEmail.setError(null);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        mPresenter.checkEmail(editable);
                     }
                 });
         mEditTextEmail.setOnFocusChangeListener(
@@ -173,7 +184,7 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
                     if (!hasFocus && view != null) {
                         CharSequence email = ((EditText) view).getText();
                         if (email.length() > 0) {
-                            mPresenter.checkEmailRegisteredOrNot(email);
+                            mRegisterViewModel.checkEmailRegisteredOrNot(email);
                         }
                     }
                 });
@@ -188,13 +199,12 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
 
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        clearPasswordError();
+                        mTextInputLayoutPassword.setError(null);
                         mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(true);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        mPresenter.checkPassword(editable);
                     }
                 });
     }
@@ -224,103 +234,13 @@ public class RegisterFragment extends BaseFragment implements RegisterContract.V
 
     @OnClick(R.id.btn_register)
     public void onBtnRegisterClicked() {
-        mPresenter.register(
+        mRegisterViewModel.register(
                 mEditTextUsername.getText(), mEditTextEmail.getText(), mEditTextPassword.getText());
     }
 
     @OnClick(R.id.link_login)
     public void onLinkLoginClicked() {
         mListener.onLoginLinkClicked();
-    }
-
-    @Override
-    public void clearUsernameError() {
-        mTextInputLayoutUsername.setError(null);
-    }
-
-    @Override
-    public void clearPasswordError() {
-        mTextInputLayoutPassword.setError(null);
-    }
-
-    @Override
-    public void clearEmailError() {
-        mTextInputLayoutEmail.setError(null);
-    }
-
-    @Override
-    public void errorEmptyUsername() {
-        mTextInputLayoutUsername.setError(mErrorFieldRequired);
-    }
-
-    @Override
-    public void errorUsernameRegistered() {
-        mTextInputLayoutUsername.setError(mErrorUsernameExisted);
-    }
-
-    @Override
-    public void errorInvalidUsername() {
-        mTextInputLayoutUsername.setError(mErrorInvalidUsername);
-    }
-
-    @Override
-    public void errorEmptyEmail() {
-        mTextInputLayoutEmail.setError(mErrorFieldRequired);
-    }
-
-    @Override
-    public void errorEmailRegistered() {
-        mTextInputLayoutEmail.setError(mErrorEmailExisted);
-    }
-
-    @Override
-    public void errorInvalidEmail() {
-        mTextInputLayoutEmail.setError(mErrorInvalidEmail);
-    }
-
-    @Override
-    public void errorEmptyPassword() {
-        mTextInputLayoutPassword.setError(mErrorFieldRequired);
-    }
-
-    @Override
-    public void errorShortPassword() {
-        mTextInputLayoutPassword.setError(mErrorShortPwd);
-    }
-
-    @Override
-    public void errorRegisterFailed() {
-        ToastUtils.error(mActivity, mErrorRegisterFailedUnknownCause);
-    }
-
-    @Override
-    public void errorInvalidPassword() {
-        mTextInputLayoutPassword.setError(mErrorInvalidPwd);
-    }
-
-    @Override
-    public void launchMainPage() {
-        MainActivity.actionStart(mActivity);
-    }
-
-    @Override
-    public void setRegisterBtnEnabled(boolean enabled) {
-        mBtnRegister.setEnabled(enabled);
-    }
-
-    @Override
-    public void setPasswordToggleEnabled(boolean enabled) {
-        mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(enabled);
-    }
-
-    @Override
-    public void showLoadingIndicator(boolean enabled) {
-        mListener.showLoadingIndicator(enabled);
-    }
-
-    @Override
-    public void showMsgRegisterSucceed() {
-        ToastUtils.success(mActivity, mMsgRegisterSuccess);
     }
 
     public interface OnClickedListener {

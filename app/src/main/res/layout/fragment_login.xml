@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.cielyang.android.login.login.LoginFragment">
+    tools:context="com.cielyang.android.login.ui.fragments.LoginFragment">
 
     <TextView
         android:layout_width="match_parent"

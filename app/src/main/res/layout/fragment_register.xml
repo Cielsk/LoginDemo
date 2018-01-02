@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    tools:context="com.cielyang.android.login.register.RegisterFragment">
+    tools:context="com.cielyang.android.login.ui.fragments.RegisterFragment">
 
     <TextView
         android:layout_width="match_parent"

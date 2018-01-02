@@ -1,8 +1,6 @@
 package com.cielyang.android.login.di;
 
-import com.cielyang.android.login.login.LoginActivity;
-import com.cielyang.android.login.login.LoginModule;
-import com.cielyang.android.login.register.RegisterModule;
+import com.cielyang.android.login.ui.activities.LoginActivity;
 import com.cielyang.android.login.ui.activities.MainActivity;
 import com.cielyang.android.login.ui.activities.SplashActivity;
 
@@ -18,7 +16,7 @@ public abstract class ActivityBindingModule {
     abstract SplashActivity bindSplashActivity();
 
     @ActivityScoped
-    @ContributesAndroidInjector(modules = {LoginModule.class, RegisterModule.class})
+    @ContributesAndroidInjector
     abstract LoginActivity bindLoginActivity();
 
     @ActivityScoped
