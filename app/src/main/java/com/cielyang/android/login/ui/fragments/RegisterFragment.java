@@ -149,6 +149,7 @@ public class RegisterFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        mRegisterViewModel.checkUsername(editable);
                     }
                 });
         mEditTextUsername.setOnFocusChangeListener(
@@ -177,6 +178,7 @@ public class RegisterFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        mRegisterViewModel.checkEmail(editable);
                     }
                 });
         mEditTextEmail.setOnFocusChangeListener(
@@ -205,6 +207,7 @@ public class RegisterFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        mRegisterViewModel.checkPassword(editable);
                         if (editable.length() == 0) {
                             mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
                         }

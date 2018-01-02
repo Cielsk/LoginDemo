@@ -1,5 +1,6 @@
 package com.cielyang.android.login.viewmodel;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
@@ -41,7 +42,7 @@ public class LoginViewModel extends ViewModel implements AccountManager.LoginByE
         return mLaunchMainPageCommand;
     }
 
-    public MutableLiveData<Boolean> getLoginState() {
+    public LiveData<Boolean> getLoginState() {
         return mIsLogging;
     }
 
@@ -53,7 +54,7 @@ public class LoginViewModel extends ViewModel implements AccountManager.LoginByE
         return mPasswordErrorResId;
     }
 
-    private void checkEmail(CharSequence email) {
+    public void checkEmail(CharSequence email) {
         mEmailErrorResId.setValue(null);
         mIsValidEmail = false;
         if (TextUtils.isEmpty(email)) {
@@ -65,17 +66,14 @@ public class LoginViewModel extends ViewModel implements AccountManager.LoginByE
         }
     }
 
-    private void checkPassword(CharSequence password) {
+    public void checkPassword(CharSequence password) {
         mPasswordErrorResId.setValue(null);
         mIsValidPassword = false;
-        boolean temp = true;
         if (TextUtils.isEmpty(password)) {
             mPasswordErrorResId.setValue(R.string.error_field_required);
-            temp = false;
         } else {
             mIsValidPassword = true;
         }
-        mIsLogging.setValue(temp);
     }
 
     public void loginByEmail(@NonNull CharSequence email, @NonNull CharSequence password) {

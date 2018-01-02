@@ -1,5 +1,6 @@
 package com.cielyang.android.login.viewmodel;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.StringRes;
@@ -36,11 +37,7 @@ public class RegisterViewModel extends ViewModel
         mAccountManager = accountManager;
     }
 
-    public AccountManager getAccountManager() {
-        return mAccountManager;
-    }
-
-    public MutableLiveData<Boolean> getRegisterState() {
+    public LiveData<Boolean> getRegisterState() {
         return mIsRegistering;
     }
 
@@ -78,7 +75,7 @@ public class RegisterViewModel extends ViewModel
         }
     }
 
-    private void checkUsername(CharSequence username) {
+    public void checkUsername(CharSequence username) {
         mUsernameErrorResId.setValue(null);
         mIsValidUsername = false;
         if (TextUtils.isEmpty(username)) {
@@ -90,7 +87,7 @@ public class RegisterViewModel extends ViewModel
         }
     }
 
-    private void checkEmail(CharSequence email) {
+    public void checkEmail(CharSequence email) {
         mEmailErrorResId.setValue(null);
         mIsValidEmail = false;
         if (TextUtils.isEmpty(email)) {
@@ -102,13 +99,11 @@ public class RegisterViewModel extends ViewModel
         }
     }
 
-    private void checkPassword(CharSequence password) {
+    public void checkPassword(CharSequence password) {
         mPasswordErrorResId.setValue(null);
         mIsValidPassword = false;
-        boolean temp = true;
         if (TextUtils.isEmpty(password)) {
             mPasswordErrorResId.setValue(R.string.error_field_required);
-            temp = false;
         } else if (ValidateUtils.isShortPassword(password)) {
             mPasswordErrorResId.setValue(R.string.error_short_password);
         } else if (!ValidateUtils.isValidPassword(password)) {
@@ -116,7 +111,6 @@ public class RegisterViewModel extends ViewModel
         } else {
             mIsValidPassword = true;
         }
-        setRegisteringState(temp);
     }
 
     public void register(CharSequence username, CharSequence email, CharSequence password) {
@@ -124,37 +118,33 @@ public class RegisterViewModel extends ViewModel
         checkEmail(email);
         checkPassword(password);
         if (mIsValidUsername && mIsValidEmail && mIsValidPassword) {
-            setRegisteringState(true);
+            mIsRegistering.setValue(true);
             mAccountManager.register(username, email, password, this);
         }
     }
 
-    private void setRegisteringState(boolean registering) {
-        mIsRegistering.setValue(registering);
-    }
-
     @Override
     public void onRegisterSucceed() {
-        setRegisteringState(false);
+        mIsRegistering.setValue(false);
         showToastMessage(R.string.msg_success_register, ToastUtils.SUCCESS);
         mLaunchMainPageCommand.call();
     }
 
     @Override
     public void onUsernameRegistered() {
-        setRegisteringState(false);
+        mIsRegistering.setValue(false);
         mUsernameErrorResId.setValue(R.string.error_username_existed);
     }
 
     @Override
     public void onEmailRegistered() {
-        setRegisteringState(false);
+        mIsRegistering.setValue(false);
         mEmailErrorResId.setValue(R.string.error_email_existed);
     }
 
     @Override
     public void onRegisterFailed() {
-        setRegisteringState(false);
+        mIsRegistering.setValue(false);
         showToastMessage(R.string.error_register_failed_unknown_cause, ToastUtils.ERROR);
     }
 

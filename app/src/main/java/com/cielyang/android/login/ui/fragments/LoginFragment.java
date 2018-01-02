@@ -99,6 +99,7 @@ public class LoginFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        mLoginViewModel.checkEmail(editable);
                     }
                 });
 
@@ -118,6 +119,7 @@ public class LoginFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        mLoginViewModel.checkPassword(editable);
                         if (editable.length() == 0) {
                             mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(false);
                         }
