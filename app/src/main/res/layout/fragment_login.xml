@@ -49,6 +49,7 @@
         app:errorEnabled="true"
         app:errorTextAppearance="@style/TextAppearance.Design.Error"
         app:hintTextAppearance="@style/TextAppearance.Design.Hint"
+        app:passwordToggleDrawable="@drawable/ic_visibility_toggle"
         app:passwordToggleEnabled="false"
         app:passwordToggleTint="@color/textColorSecondary">
 

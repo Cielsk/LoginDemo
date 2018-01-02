@@ -205,6 +205,9 @@ public class RegisterFragment extends BaseFragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        if (editable.length() == 0) {
+                            mTextInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
+                        }
                     }
                 });
     }

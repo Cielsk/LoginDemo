@@ -113,10 +113,14 @@ public class LoginFragment extends BaseFragment {
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                         mTextInputLayoutPwd.setError(null);
+                        mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(true);
                     }
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        if (editable.length() == 0) {
+                            mTextInputLayoutPwd.setPasswordVisibilityToggleEnabled(false);
+                        }
                     }
                 });
     }
