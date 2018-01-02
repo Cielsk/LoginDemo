@@ -36,7 +36,7 @@ android {
     if (project.hasProperty('devBuild')) {
         aaptOptions.cruncherEnabled = false
     }
-    buildToolsVersion '27.0.2'
+    buildToolsVersion '27.0.3'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
