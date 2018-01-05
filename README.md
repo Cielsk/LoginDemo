@@ -1,4 +1,5 @@
 # LoginDemo
+
 使用各种常见的架构模式实现登录与注册功能
 
 ## 项目目的
@@ -8,7 +9,7 @@
 
 ## 各个分支简介
 
-- master：使用最基本的 MVC 结构，以 Activity 充当 Controller
+- mvc：MVC 结构，以 Activity 充当 Controller
 - mvp：使用 [Android Architecture](https://github.com/googlesamples/android-architecture) todo-mvp 分支推荐的 mvp 架构方式
 - mvvm：使用 [Android Architecture](https://github.com/googlesamples/android-architecture) todo-mvvm-live 推荐的 mvvm 架构方式
 
